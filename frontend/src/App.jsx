@@ -1,13 +1,6 @@
-import {
-  useState,
-  useEffect,
-  useRef,
-} from "react";
-
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-
 import { motion } from "framer-motion";
-
 import ReactMarkdown from "react-markdown";
 
 import {
@@ -27,311 +20,205 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 
-import {
-  MathJax,
-  MathJaxContext,
-} from "better-react-mathjax";
+import { MathJax, MathJaxContext } from "better-react-mathjax";
+import { useDropzone } from "react-dropzone";
 
-import {
-  useDropzone,
-} from "react-dropzone";
+// CHANGE THIS TO YOUR REAL RENDER BACKEND URL
+const API_URL = "https://homework-ai-app-jgsw.onrender.com";
 
 export default function App() {
-
-  const [question, setQuestion] =
-    useState("");
-
-  const [messages, setMessages] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(false);
-
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [xp, setXp] = useState(0);
+  const [image, setImage] = useState(null);
+  const [tutorStyle, setTutorStyle] = useState("friendly");
 
-  const [image, setImage] =
-    useState(null);
-
-  const [tutorStyle, setTutorStyle] =
-    useState("friendly");
-
-  const [loggedIn, setLoggedIn] =
-    useState(
-      !!localStorage.getItem(
-        "homeworkUser"
-      )
-    );
+  const [loggedIn, setLoggedIn] = useState(
+    !!localStorage.getItem("homeworkUser")
+  );
 
   const messagesEndRef = useRef(null);
 
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-  } = useSpeechRecognition();
+  const { transcript, listening, resetTranscript } =
+    useSpeechRecognition();
 
-  // DRAG DROP
-  const {
-    getRootProps,
-    getInputProps,
-  } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: {
+      "image/*": [],
+      "application/pdf": [],
+    },
     onDrop: (acceptedFiles) => {
-      setImage(acceptedFiles[0]);
+      if (acceptedFiles.length > 0) {
+        setImage(acceptedFiles[0]);
+      }
     },
   });
 
-  // AUTO SCROLL
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
   }, [messages]);
 
-  // LOAD SAVED DATA
   useEffect(() => {
+    const user = localStorage.getItem("homeworkUser");
 
-    const user =
-      localStorage.getItem(
-        "homeworkUser"
-      );
+    if (!user) return;
 
-    const savedMessages =
-      localStorage.getItem(
-        `chatHistory_${user}`
-      );
-
-    const savedXP =
-      localStorage.getItem(
-        `xp_${user}`
-      );
+    const savedMessages = localStorage.getItem(`chatHistory_${user}`);
+    const savedXP = localStorage.getItem(`xp_${user}`);
 
     if (savedMessages) {
-      setMessages(
-        JSON.parse(savedMessages)
-      );
+      setMessages(JSON.parse(savedMessages));
     }
 
     if (savedXP) {
       setXp(Number(savedXP));
     }
-
   }, []);
 
-  // SAVE DATA
   useEffect(() => {
+    const user = localStorage.getItem("homeworkUser");
 
-    const user =
-      localStorage.getItem(
-        "homeworkUser"
-      );
+    if (!user) return;
 
-    localStorage.setItem(
-      `chatHistory_${user}`,
-      JSON.stringify(messages)
-    );
-
-    localStorage.setItem(
-      `xp_${user}`,
-      xp
-    );
-
+    localStorage.setItem(`chatHistory_${user}`, JSON.stringify(messages));
+    localStorage.setItem(`xp_${user}`, xp.toString());
   }, [messages, xp]);
 
-  // SPEAK TEXT
   const speakText = (text) => {
-
-    // STOP PREVIOUS VOICE
     window.speechSynthesis.cancel();
 
-    const speech =
-      new SpeechSynthesisUtterance(
-        text
-      );
-
+    const speech = new SpeechSynthesisUtterance(text);
     speech.rate = 1;
 
-    window.speechSynthesis.speak(
-      speech
-    );
+    window.speechSynthesis.speak(speech);
   };
 
-  // STOP SPEAKING
   const stopSpeaking = () => {
-
     window.speechSynthesis.cancel();
-
   };
 
-  // SEND MESSAGE
   const solveHomework = async () => {
+    const finalQuestion = transcript || question;
 
-    if (!question && !image)
-      return;
+    if (!finalQuestion && !image) return;
 
     const userMessage = {
       type: "user",
-      text: question,
+      text: finalQuestion || `Uploaded file: ${image?.name}`,
     };
 
-    setMessages((prev) => [
-      ...prev,
-      userMessage,
-    ]);
+    setMessages((prev) => [...prev, userMessage]);
 
     try {
-
       setLoading(true);
 
-      const formData =
-        new FormData();
+      const formData = new FormData();
 
-      formData.append(
-        "question",
-        question
-      );
-
-      formData.append(
-        "tutorStyle",
-        tutorStyle
-      );
+      formData.append("question", finalQuestion);
+      formData.append("tutorStyle", tutorStyle);
 
       if (image) {
-        formData.append(
-          "image",
-          image
-        );
+        formData.append("image", image);
       }
 
-      const res =
-        await axios.post(
-          "https://homework-ai-app-jgsw.onrender.com",
-          formData
-        );
+      const res = await axios.post(API_URL, formData);
 
       const aiMessage = {
         type: "ai",
-        text: res.data.answer,
+        text: res.data.answer || "No answer received.",
       };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      setXp((prev) => prev + 10);
+    } catch (err) {
+      console.log(err);
 
       setMessages((prev) => [
         ...prev,
-        aiMessage,
+        {
+          type: "ai",
+          text:
+            "Something went wrong. Check if your Render backend is live and your API URL is correct.",
+        },
       ]);
-
-      setXp((prev) => prev + 10);
-
-    } catch (err) {
-
-      console.log(err);
-
     }
 
     setQuestion("");
+    setImage(null);
     setLoading(false);
     resetTranscript();
   };
 
-  // CLEAR CHAT
   const clearChat = () => {
-
     setMessages([]);
 
-    const user =
-      localStorage.getItem(
-        "homeworkUser"
-      );
+    const user = localStorage.getItem("homeworkUser");
 
-    localStorage.removeItem(
-      `chatHistory_${user}`
-    );
+    if (user) {
+      localStorage.removeItem(`chatHistory_${user}`);
+    }
   };
 
-  // LOGIN
+  const logout = () => {
+    window.speechSynthesis.cancel();
+    localStorage.removeItem("homeworkUser");
+    setLoggedIn(false);
+  };
+
   if (!loggedIn) {
-    return (
-      <Login
-        setLoggedIn={
-          setLoggedIn
-        }
-      />
-    );
+    return <Login setLoggedIn={setLoggedIn} />;
   }
 
-  // ACHIEVEMENTS
   const achievements = [
     {
-      name:
-        "Homework Beginner",
+      name: "Homework Beginner",
       unlocked: xp >= 50,
     },
     {
-      name:
-        "Study Master",
+      name: "Study Master",
       unlocked: xp >= 200,
+    },
+    {
+      name: "AI Legend",
+      unlocked: xp >= 500,
     },
   ];
 
   return (
     <MathJaxContext>
-
       <div className="min-h-screen bg-black text-white overflow-hidden relative">
-
-        {/* GLOWS */}
         <div className="absolute w-[500px] h-[500px] bg-blue-600 opacity-20 blur-3xl rounded-full top-[-100px] left-[-100px]" />
-
         <div className="absolute w-[400px] h-[400px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-100px] right-[-100px]" />
 
-        {/* MAIN */}
         <div className="relative z-10 flex flex-col h-screen">
-
-          {/* HEADER */}
           <div className="flex items-center justify-between p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg">
-
             <div className="flex items-center gap-4">
-
               <div className="bg-blue-600 p-4 rounded-2xl">
                 <FaRobot size={28} />
               </div>
 
               <div>
-
-                <h1 className="text-3xl font-bold">
-                  Homework AI
-                </h1>
-
+                <h1 className="text-3xl font-bold">Homework AI</h1>
                 <p className="text-slate-400 text-sm">
                   Learn step-by-step
                 </p>
-
               </div>
-
             </div>
 
-            {/* RIGHT */}
-            <div className="flex items-center gap-4">
-
+            <div className="flex items-center gap-3">
               <select
                 value={tutorStyle}
-                onChange={(e) =>
-                  setTutorStyle(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setTutorStyle(e.target.value)}
                 className="bg-black/40 border border-white/10 rounded-xl p-2"
               >
-
-                <option value="friendly">
-                  Friendly
-                </option>
-
-                <option value="strict">
-                  Strict
-                </option>
-
-                <option value="fun">
-                  Fun
-                </option>
-
+                <option value="friendly">Friendly</option>
+                <option value="strict">Strict</option>
+                <option value="fun">Fun</option>
+                <option value="exam">Exam Coach</option>
+                <option value="simple">Explain Simply</option>
               </select>
 
               <div className="bg-yellow-500 text-black px-4 py-2 rounded-xl font-bold">
@@ -340,241 +227,179 @@ export default function App() {
 
               <button
                 onClick={clearChat}
-                className="bg-red-500 p-3 rounded-xl"
+                className="bg-red-500 hover:bg-red-600 p-3 rounded-xl"
               >
                 <FaTrash />
               </button>
 
+              <button
+                onClick={logout}
+                className="bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl font-bold"
+              >
+                Logout
+              </button>
             </div>
-
           </div>
 
-          {/* ACHIEVEMENTS */}
           <div className="p-4 flex gap-4 overflow-x-auto">
+            {achievements.map((a, i) => (
+              <div
+                key={i}
+                className={`px-4 py-2 rounded-xl whitespace-nowrap ${
+                  a.unlocked ? "bg-green-500" : "bg-slate-700"
+                }`}
+              >
+                🏆 {a.name}
+              </div>
+            ))}
+          </div>
 
-            {achievements.map(
-              (a, i) => (
-
-                <div
-                  key={i}
-                  className={`px-4 py-2 rounded-xl ${
-                    a.unlocked
-                      ? "bg-green-500"
-                      : "bg-slate-700"
-                  }`}
-                >
-                  🏆 {a.name}
-                </div>
-
-              )
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {messages.length === 0 && (
+              <div className="text-center text-slate-400 mt-20">
+                <h2 className="text-3xl font-bold mb-3 text-white">
+                  Ask your first homework question
+                </h2>
+                <p>Type a question, use the mic, or upload homework.</p>
+              </div>
             )}
 
-          </div>
-
-          {/* CHAT */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-
-            {messages.map(
-              (msg, index) => (
-
-                <motion.div
-                  key={index}
-                  initial={{
-                    opacity: 0,
-                    y: 20,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  className={`flex ${
-                    msg.type ===
-                    "user"
-                      ? "justify-end"
-                      : "justify-start"
+            {messages.map((msg, index) => (
+              <motion.div
+                key={index}
+                initial={{
+                  opacity: 0,
+                  y: 20,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                className={`flex ${
+                  msg.type === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-lg ${
+                    msg.type === "user"
+                      ? "bg-blue-600"
+                      : "bg-white/10 backdrop-blur-lg border border-white/10"
                   }`}
                 >
+                  <div className="flex items-center gap-3 mb-3">
+                    {msg.type === "user" ? <FaUser /> : <FaRobot />}
 
-                  <div
-                    className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-lg ${
-                      msg.type ===
-                      "user"
-                        ? "bg-blue-600"
-                        : "bg-white/10 backdrop-blur-lg border border-white/10"
-                    }`}
-                  >
-
-                    <div className="flex items-center gap-3 mb-3">
-
-                      {msg.type ===
-                      "user" ? (
-                        <FaUser />
-                      ) : (
-                        <FaRobot />
-                      )}
-
-                      <span className="font-bold">
-                        {msg.type ===
-                        "user"
-                          ? "You"
-                          : "Homework AI"}
-                      </span>
-
-                    </div>
-
-                    <MathJax>
-                      {msg.type ===
-                      "ai" ? (
-
-                        <Typewriter
-                          words={[
-                            msg.text,
-                          ]}
-                          loop={1}
-                          cursor
-                          typeSpeed={
-                            15
-                          }
-                        />
-
-                      ) : (
-
-                        <ReactMarkdown>
-                          {msg.text}
-                        </ReactMarkdown>
-
-                      )}
-                    </MathJax>
-
-                    {msg.type ===
-                      "ai" && (
-
-                      <div className="flex gap-3 mt-4">
-
-                        {/* SPEAK */}
-                        <button
-                          onClick={() =>
-                            speakText(
-                              msg.text
-                            )
-                          }
-                          className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl flex items-center gap-2"
-                        >
-
-                          <FaVolumeUp />
-
-                          Speak
-
-                        </button>
-
-                        {/* STOP */}
-                        <button
-                          onClick={
-                            stopSpeaking
-                          }
-                          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl flex items-center gap-2"
-                        >
-
-                          <FaStop />
-
-                          Stop
-
-                        </button>
-
-                      </div>
-
-                    )}
-
+                    <span className="font-bold">
+                      {msg.type === "user" ? "You" : "Homework AI"}
+                    </span>
                   </div>
 
-                </motion.div>
+                  <MathJax>
+                    {msg.type === "ai" ? (
+                      <div className="prose prose-invert max-w-none">
+                        <Typewriter
+                          words={[msg.text]}
+                          loop={1}
+                          cursor
+                          typeSpeed={10}
+                        />
+                      </div>
+                    ) : (
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    )}
+                  </MathJax>
 
-              )
-            )}
+                  {msg.type === "ai" && (
+                    <div className="flex gap-3 mt-4">
+                      <button
+                        onClick={() => speakText(msg.text)}
+                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl flex items-center gap-2"
+                      >
+                        <FaVolumeUp />
+                        Speak
+                      </button>
 
-            {/* LOADING */}
+                      <button
+                        onClick={stopSpeaking}
+                        className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl flex items-center gap-2"
+                      >
+                        <FaStop />
+                        Stop
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+
             {loading && (
-
               <div className="flex gap-2">
-
                 <div className="w-3 h-3 bg-white rounded-full animate-bounce" />
-
                 <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-100" />
-
                 <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-200" />
-
               </div>
-
             )}
 
             <div ref={messagesEndRef} />
-
           </div>
 
-          {/* INPUT */}
           <div className="p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg">
-
-            {/* DROPZONE */}
             <div
               {...getRootProps()}
-              className="border-2 border-dashed border-white/20 rounded-2xl p-6 mb-4 cursor-pointer text-center"
+              className="border-2 border-dashed border-white/20 rounded-2xl p-4 mb-4 cursor-pointer text-center hover:bg-white/5 transition"
             >
+              <input {...getInputProps()} />
 
-              <input
-                {...getInputProps()}
-              />
-
-              <p>
-                📸 Drag homework
-                image here
-              </p>
-
+              <p>📸 Drag homework image/PDF here or click to upload</p>
             </div>
 
             {image && (
-
-              <img
-                src={URL.createObjectURL(
-                  image
+              <div className="mb-4 bg-white/10 rounded-2xl p-3 flex items-center gap-4">
+                {image.type.startsWith("image/") && (
+                  <img
+                    src={URL.createObjectURL(image)}
+                    alt="preview"
+                    className="w-24 rounded-xl"
+                  />
                 )}
-                alt="preview"
-                className="w-40 rounded-2xl mb-4"
-              />
 
+                <div>
+                  <p className="font-bold">{image.name}</p>
+                  <p className="text-slate-400 text-sm">
+                    Ready to upload
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setImage(null)}
+                  className="ml-auto bg-red-500 px-3 py-2 rounded-xl"
+                >
+                  Remove
+                </button>
+              </div>
             )}
 
-            {/* INPUT AREA */}
             <div className="flex gap-4">
-
               <textarea
-                value={
-                  transcript ||
-                  question
-                }
-                onChange={(e) =>
-                  setQuestion(
-                    e.target.value
-                  )
-                }
+                value={transcript || question}
+                onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Ask homework question..."
                 className="flex-1 bg-white/10 border border-white/10 rounded-2xl p-4 outline-none resize-none h-20"
               />
 
-              {/* MIC */}
               <button
                 onClick={() =>
-                  SpeechRecognition.startListening()
+                  SpeechRecognition.startListening({
+                    continuous: false,
+                  })
                 }
                 className={`px-5 rounded-2xl ${
-                  listening
-                    ? "bg-red-500"
-                    : "bg-slate-700"
+                  listening ? "bg-red-500" : "bg-slate-700"
                 }`}
               >
                 🎤
               </button>
 
-              {/* SEND */}
               <motion.button
                 whileHover={{
                   scale: 1.05,
@@ -582,24 +407,16 @@ export default function App() {
                 whileTap={{
                   scale: 0.95,
                 }}
-                onClick={
-                  solveHomework
-                }
-                className="bg-blue-600 hover:bg-blue-700 px-6 rounded-2xl text-2xl"
+                onClick={solveHomework}
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 px-6 rounded-2xl text-2xl"
               >
-
                 <FaPaperPlane />
-
               </motion.button>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </MathJaxContext>
   );
 }
