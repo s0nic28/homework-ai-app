@@ -10,6 +10,7 @@ import {
   FaVolumeUp,
   FaTrash,
   FaStop,
+  FaCode,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -113,12 +114,47 @@ export default function App() {
 
     if (!finalQuestion && !image) return;
 
+    const lowerQuestion = finalQuestion.toLowerCase();
+
+    const creatorQuestions = [
+      "who created you",
+      "who made you",
+      "who is your creator",
+      "who built you",
+      "who developed you",
+      "who created this app",
+      "who made this app",
+      "who built this app",
+      "who is the creator",
+      "who owns you",
+      "who is mithun",
+    ];
+
+    const isCreatorQuestion = creatorQuestions.some((q) =>
+      lowerQuestion.includes(q)
+    );
+
     const userMessage = {
       type: "user",
       text: finalQuestion || `Uploaded file: ${image?.name}`,
     };
 
     setMessages((prev) => [...prev, userMessage]);
+
+    if (isCreatorQuestion) {
+      const aiMessage = {
+        type: "ai",
+        text:
+          "# Creator\n\nI was created by **Mithun**.\n\nThis app was built by **Mithun** to help students learn homework step-by-step.",
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      setXp((prev) => prev + 5);
+      setQuestion("");
+      setImage(null);
+      resetTranscript();
+      return;
+    }
 
     try {
       setLoading(true);
@@ -217,7 +253,7 @@ export default function App() {
             transition={{ delay: 0.8 }}
             className="text-slate-400 mt-3 text-lg"
           >
-            Preparing your AI tutor...
+            Made by Mithun
           </motion.p>
 
           <div className="flex justify-center gap-2 mt-8">
@@ -264,9 +300,11 @@ export default function App() {
 
               <div>
                 <h1 className="text-3xl font-bold">Homework AI</h1>
-                <p className="text-slate-400 text-sm">
-                  Learn step-by-step
-                </p>
+
+                <div className="flex items-center gap-2 text-slate-400 text-sm">
+                  <FaCode />
+                  <p>Made by Mithun</p>
+                </div>
               </div>
             </div>
 
@@ -323,6 +361,9 @@ export default function App() {
                   Ask your first homework question
                 </h2>
                 <p>Type a question, use the mic, or upload homework.</p>
+                <p className="mt-3 text-sm text-slate-500">
+                  Made by Mithun
+                </p>
               </div>
             )}
 
