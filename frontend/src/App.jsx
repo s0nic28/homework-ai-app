@@ -11,6 +11,12 @@ import {
   FaTrash,
   FaStop,
   FaCode,
+  FaBrain,
+  FaSmile,
+  FaChalkboardTeacher,
+  FaGamepad,
+  FaGraduationCap,
+  FaLightbulb,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -23,7 +29,6 @@ import SpeechRecognition, {
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { useDropzone } from "react-dropzone";
 
-// IMPORTANT: keep /ai/solve at the end
 const API_URL = "https://homework-ai-app-jgsw.onrender.com/ai/solve";
 
 export default function App() {
@@ -44,7 +49,45 @@ export default function App() {
   const { transcript, listening, resetTranscript } =
     useSpeechRecognition();
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const tutorModes = [
+    {
+      id: "friendly",
+      name: "Friendly",
+      icon: <FaSmile />,
+      gradient: "from-blue-500 to-cyan-400",
+      desc: "Chill helper",
+    },
+    {
+      id: "strict",
+      name: "Strict",
+      icon: <FaChalkboardTeacher />,
+      gradient: "from-red-500 to-orange-400",
+      desc: "Teacher mode",
+    },
+    {
+      id: "fun",
+      name: "Fun",
+      icon: <FaGamepad />,
+      gradient: "from-purple-500 to-pink-500",
+      desc: "Fun examples",
+    },
+    {
+      id: "exam",
+      name: "Exam Coach",
+      icon: <FaGraduationCap />,
+      gradient: "from-yellow-400 to-orange-500",
+      desc: "Exam focus",
+    },
+    {
+      id: "simple",
+      name: "Simple",
+      icon: <FaLightbulb />,
+      gradient: "from-green-400 to-emerald-600",
+      desc: "Easy words",
+    },
+  ];
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
       "image/*": [],
       "application/pdf": [],
@@ -77,6 +120,7 @@ export default function App() {
 
     const savedMessages = localStorage.getItem(`chatHistory_${user}`);
     const savedXP = localStorage.getItem(`xp_${user}`);
+    const savedMode = localStorage.getItem(`mode_${user}`);
 
     if (savedMessages) {
       setMessages(JSON.parse(savedMessages));
@@ -84,6 +128,10 @@ export default function App() {
 
     if (savedXP) {
       setXp(Number(savedXP));
+    }
+
+    if (savedMode) {
+      setTutorStyle(savedMode);
     }
   }, []);
 
@@ -94,7 +142,8 @@ export default function App() {
 
     localStorage.setItem(`chatHistory_${user}`, JSON.stringify(messages));
     localStorage.setItem(`xp_${user}`, xp.toString());
-  }, [messages, xp]);
+    localStorage.setItem(`mode_${user}`, tutorStyle);
+  }, [messages, xp, tutorStyle]);
 
   const speakText = (text) => {
     window.speechSynthesis.cancel();
@@ -218,7 +267,6 @@ export default function App() {
   if (showSplash) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative">
-        {/* Moving glow blob 1 */}
         <motion.div
           animate={{
             x: [0, 80, -40, 0],
@@ -233,7 +281,6 @@ export default function App() {
           className="absolute w-[550px] h-[550px] bg-blue-600 opacity-30 blur-3xl rounded-full"
         />
 
-        {/* Moving glow blob 2 */}
         <motion.div
           animate={{
             x: [0, -70, 50, 0],
@@ -248,11 +295,8 @@ export default function App() {
           className="absolute w-[430px] h-[430px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
         />
 
-        {/* Rotating rings */}
         <motion.div
-          animate={{
-            rotate: 360,
-          }}
+          animate={{ rotate: 360 }}
           transition={{
             duration: 20,
             repeat: Infinity,
@@ -262,9 +306,7 @@ export default function App() {
         />
 
         <motion.div
-          animate={{
-            rotate: -360,
-          }}
+          animate={{ rotate: -360 }}
           transition={{
             duration: 25,
             repeat: Infinity,
@@ -273,8 +315,7 @@ export default function App() {
           className="absolute w-[520px] h-[520px] border border-purple-500/20 rounded-full"
         />
 
-        {/* Floating particles */}
-        {[...Array(18)].map((_, i) => (
+        {[...Array(22)].map((_, i) => (
           <motion.div
             key={i}
             initial={{
@@ -283,24 +324,23 @@ export default function App() {
             }}
             animate={{
               opacity: [0, 1, 0],
-              y: [-20, -180],
-              x: [0, i % 2 === 0 ? 40 : -40],
+              y: [-20, -200],
+              x: [0, i % 2 === 0 ? 45 : -45],
             }}
             transition={{
               duration: 3 + (i % 5),
               repeat: Infinity,
-              delay: i * 0.2,
+              delay: i * 0.18,
               ease: "easeOut",
             }}
             className="absolute w-2 h-2 bg-white/50 rounded-full"
             style={{
-              left: `${10 + i * 5}%`,
+              left: `${8 + i * 4}%`,
               bottom: "20%",
             }}
           />
         ))}
 
-        {/* Main splash card */}
         <motion.div
           initial={{
             opacity: 0,
@@ -318,7 +358,6 @@ export default function App() {
           }}
           className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-xl rounded-[2rem] px-12 py-10 shadow-2xl"
         >
-          {/* Robot icon */}
           <motion.div
             animate={{
               y: [0, -12, 0],
@@ -347,7 +386,6 @@ export default function App() {
             />
           </motion.div>
 
-          {/* Title */}
           <motion.h1
             initial={{
               opacity: 0,
@@ -357,9 +395,7 @@ export default function App() {
               opacity: 1,
               y: 0,
             }}
-            transition={{
-              delay: 0.3,
-            }}
+            transition={{ delay: 0.3 }}
             className="text-6xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
           >
             Homework AI
@@ -374,45 +410,31 @@ export default function App() {
               opacity: 1,
               y: 0,
             }}
-            transition={{
-              delay: 0.6,
-            }}
+            transition={{ delay: 0.6 }}
             className="text-slate-300 mt-4 text-lg"
           >
             Made by Mithun
           </motion.p>
 
           <motion.p
-            initial={{
-              opacity: 0,
-            }}
-            animate={{
-              opacity: 1,
-            }}
-            transition={{
-              delay: 0.9,
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
             className="text-slate-500 mt-2 text-sm"
           >
             Loading your step-by-step AI tutor...
           </motion.p>
 
-          {/* Loading dots */}
           <div className="flex justify-center gap-2 mt-8">
             <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
             <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
             <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-200" />
           </div>
 
-          {/* Progress bar */}
           <div className="mt-8 w-72 h-2 bg-white/10 rounded-full overflow-hidden mx-auto">
             <motion.div
-              initial={{
-                width: "0%",
-              }}
-              animate={{
-                width: "100%",
-              }}
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
               transition={{
                 duration: 2.5,
                 ease: "easeInOut",
@@ -447,19 +469,75 @@ export default function App() {
   return (
     <MathJaxContext>
       <div className="min-h-screen bg-black text-white overflow-hidden relative">
-        <div className="absolute w-[500px] h-[500px] bg-blue-600 opacity-20 blur-3xl rounded-full top-[-100px] left-[-100px]" />
-        <div className="absolute w-[400px] h-[400px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-100px] right-[-100px]" />
+        <motion.div
+          animate={{
+            x: [0, 60, -40, 0],
+            y: [0, -40, 30, 0],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute w-[500px] h-[500px] bg-blue-600 opacity-20 blur-3xl rounded-full top-[-100px] left-[-100px]"
+        />
+
+        <motion.div
+          animate={{
+            x: [0, -50, 40, 0],
+            y: [0, 40, -30, 0],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute w-[400px] h-[400px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-100px] right-[-100px]"
+        />
 
         <div className="relative z-10 flex flex-col h-screen">
-          {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg">
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -40,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.7,
+            }}
+            className="flex items-center justify-between p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg"
+          >
             <div className="flex items-center gap-4">
-              <div className="bg-blue-600 p-4 rounded-2xl">
+              <motion.div
+                whileHover={{
+                  rotate: 10,
+                  scale: 1.1,
+                }}
+                whileTap={{
+                  scale: 0.9,
+                }}
+                className="bg-blue-600 p-4 rounded-2xl shadow-[0_0_30px_rgba(37,99,235,0.8)]"
+              >
                 <FaRobot size={28} />
-              </div>
+              </motion.div>
 
               <div>
-                <h1 className="text-3xl font-bold">Homework AI</h1>
+                <motion.h1
+                  initial={{
+                    opacity: 0,
+                    x: -20,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                  }}
+                  className="text-3xl font-bold"
+                >
+                  Homework AI
+                </motion.h1>
 
                 <div className="flex items-center gap-2 text-slate-400 text-sm">
                   <FaCode />
@@ -469,64 +547,173 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-3">
-              <select
-                value={tutorStyle}
-                onChange={(e) => setTutorStyle(e.target.value)}
-                className="bg-black/40 border border-white/10 rounded-xl p-2"
+              <motion.div
+                whileHover={{
+                  scale: 1.08,
+                }}
+                className="bg-yellow-500 text-black px-4 py-2 rounded-xl font-bold shadow-[0_0_25px_rgba(234,179,8,0.6)]"
               >
-                <option value="friendly">Friendly</option>
-                <option value="strict">Strict</option>
-                <option value="fun">Fun</option>
-                <option value="exam">Exam Coach</option>
-                <option value="simple">Explain Simply</option>
-              </select>
-
-              <div className="bg-yellow-500 text-black px-4 py-2 rounded-xl font-bold">
                 XP: {xp}
-              </div>
+              </motion.div>
 
-              <button
+              <motion.button
+                whileHover={{
+                  scale: 1.1,
+                  rotate: 5,
+                }}
+                whileTap={{
+                  scale: 0.9,
+                }}
                 onClick={clearChat}
-                className="bg-red-500 hover:bg-red-600 p-3 rounded-xl"
+                className="bg-red-500 hover:bg-red-600 p-3 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.5)]"
               >
                 <FaTrash />
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={{
+                  scale: 1.08,
+                }}
+                whileTap={{
+                  scale: 0.95,
+                }}
                 onClick={logout}
                 className="bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl font-bold"
               >
                 Logout
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Achievements */}
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: -20,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              delay: 0.2,
+            }}
+            className="p-4 border-b border-white/5 bg-black/20"
+          >
+            <p className="text-sm text-slate-400 mb-3 flex items-center gap-2">
+              <FaBrain />
+              Choose AI Mode
+            </p>
+
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {tutorModes.map((mode) => (
+                <motion.button
+                  key={mode.id}
+                  onClick={() => setTutorStyle(mode.id)}
+                  whileHover={{
+                    scale: 1.08,
+                    y: -5,
+                  }}
+                  whileTap={{
+                    scale: 0.92,
+                  }}
+                  animate={
+                    tutorStyle === mode.id
+                      ? {
+                          y: [0, -4, 0],
+                          boxShadow: [
+                            "0 0 0px rgba(255,255,255,0.2)",
+                            "0 0 28px rgba(255,255,255,0.35)",
+                            "0 0 0px rgba(255,255,255,0.2)",
+                          ],
+                        }
+                      : {}
+                  }
+                  transition={{
+                    duration: 1.8,
+                    repeat: tutorStyle === mode.id ? Infinity : 0,
+                  }}
+                  className={`min-w-[150px] p-4 rounded-2xl border transition relative overflow-hidden ${
+                    tutorStyle === mode.id
+                      ? "border-white/40 bg-white/15"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  }`}
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${mode.gradient} opacity-${
+                      tutorStyle === mode.id ? "30" : "10"
+                    }`}
+                  />
+
+                  <div className="relative z-10">
+                    <div className="text-2xl mb-2">{mode.icon}</div>
+                    <p className="font-bold">{mode.name}</p>
+                    <p className="text-xs text-slate-300">{mode.desc}</p>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
           <div className="p-4 flex gap-4 overflow-x-auto">
             {achievements.map((a, i) => (
-              <div
+              <motion.div
                 key={i}
+                initial={{
+                  opacity: 0,
+                  scale: 0.8,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                transition={{
+                  delay: i * 0.15,
+                }}
+                whileHover={{
+                  scale: 1.08,
+                  y: -4,
+                }}
                 className={`px-4 py-2 rounded-xl whitespace-nowrap ${
-                  a.unlocked ? "bg-green-500" : "bg-slate-700"
+                  a.unlocked
+                    ? "bg-green-500 shadow-[0_0_25px_rgba(34,197,94,0.6)]"
+                    : "bg-slate-700"
                 }`}
               >
                 🏆 {a.name}
-              </div>
+              </motion.div>
             ))}
           </div>
 
-          {/* Chat */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {messages.length === 0 && (
-              <div className="text-center text-slate-400 mt-20">
-                <h2 className="text-3xl font-bold mb-3 text-white">
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  y: 30,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                className="text-center text-slate-400 mt-20"
+              >
+                <motion.h2
+                  animate={{
+                    scale: [1, 1.03, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                  className="text-3xl font-bold mb-3 text-white"
+                >
                   Ask your first homework question
-                </h2>
+                </motion.h2>
                 <p>Type a question, use the mic, or upload homework.</p>
                 <p className="mt-3 text-sm text-slate-500">
                   Made by Mithun
                 </p>
-              </div>
+              </motion.div>
             )}
 
             {messages.map((msg, index) => (
@@ -534,25 +721,48 @@ export default function App() {
                 key={index}
                 initial={{
                   opacity: 0,
-                  y: 20,
+                  y: 30,
+                  scale: 0.95,
                 }}
                 animate={{
                   opacity: 1,
                   y: 0,
+                  scale: 1,
+                }}
+                transition={{
+                  duration: 0.4,
+                  type: "spring",
                 }}
                 className={`flex ${
                   msg.type === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div
+                <motion.div
+                  whileHover={{
+                    scale: 1.01,
+                  }}
                   className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-lg ${
                     msg.type === "user"
-                      ? "bg-blue-600"
-                      : "bg-white/10 backdrop-blur-lg border border-white/10"
+                      ? "bg-blue-600 shadow-[0_0_25px_rgba(37,99,235,0.4)]"
+                      : "bg-white/10 backdrop-blur-lg border border-white/10 shadow-[0_0_25px_rgba(255,255,255,0.08)]"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    {msg.type === "user" ? <FaUser /> : <FaRobot />}
+                    <motion.div
+                      animate={
+                        msg.type === "ai"
+                          ? {
+                              rotate: [0, 10, -10, 0],
+                            }
+                          : {}
+                      }
+                      transition={{
+                        duration: 2,
+                        repeat: msg.type === "ai" ? Infinity : 0,
+                      }}
+                    >
+                      {msg.type === "user" ? <FaUser /> : <FaRobot />}
+                    </motion.div>
 
                     <span className="font-bold">
                       {msg.type === "user" ? "You" : "Homework AI"}
@@ -576,51 +786,127 @@ export default function App() {
 
                   {msg.type === "ai" && (
                     <div className="flex gap-3 mt-4">
-                      <button
+                      <motion.button
+                        whileHover={{
+                          scale: 1.08,
+                          y: -2,
+                        }}
+                        whileTap={{
+                          scale: 0.92,
+                        }}
                         onClick={() => speakText(msg.text)}
                         className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl flex items-center gap-2"
                       >
                         <FaVolumeUp />
                         Speak
-                      </button>
+                      </motion.button>
 
-                      <button
+                      <motion.button
+                        whileHover={{
+                          scale: 1.08,
+                          y: -2,
+                        }}
+                        whileTap={{
+                          scale: 0.92,
+                        }}
                         onClick={stopSpeaking}
                         className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl flex items-center gap-2"
                       >
                         <FaStop />
                         Stop
-                      </button>
+                      </motion.button>
                     </div>
                   )}
-                </div>
+                </motion.div>
               </motion.div>
             ))}
 
             {loading && (
-              <div className="flex gap-2">
-                <div className="w-3 h-3 bg-white rounded-full animate-bounce" />
-                <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-100" />
-                <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-200" />
-              </div>
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  scale: 0.8,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                className="flex items-center gap-3 bg-white/10 border border-white/10 rounded-2xl w-fit px-5 py-4"
+              >
+                <FaRobot />
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
+                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
+                  <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-200" />
+                </div>
+              </motion.div>
             )}
 
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg">
-            <div
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 40,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              delay: 0.3,
+            }}
+            className="p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg"
+          >
+            <motion.div
               {...getRootProps()}
-              className="border-2 border-dashed border-white/20 rounded-2xl p-4 mb-4 cursor-pointer text-center hover:bg-white/5 transition"
+              whileHover={{
+                scale: 1.01,
+              }}
+              animate={
+                isDragActive
+                  ? {
+                      scale: 1.03,
+                      borderColor: "rgba(96,165,250,0.9)",
+                    }
+                  : {}
+              }
+              className={`border-2 border-dashed rounded-2xl p-4 mb-4 cursor-pointer text-center transition ${
+                isDragActive
+                  ? "border-blue-400 bg-blue-500/20"
+                  : "border-white/20 hover:bg-white/5"
+              }`}
             >
               <input {...getInputProps()} />
 
-              <p>📸 Drag homework image/PDF here or click to upload</p>
-            </div>
+              <motion.p
+                animate={{
+                  y: [0, -3, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                }}
+              >
+                📸 Drag homework image/PDF here or click to upload
+              </motion.p>
+            </motion.div>
 
             {image && (
-              <div className="mb-4 bg-white/10 rounded-2xl p-3 flex items-center gap-4">
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  scale: 0.9,
+                  y: 15,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                }}
+                className="mb-4 bg-white/10 rounded-2xl p-3 flex items-center gap-4"
+              >
                 {image.type.startsWith("image/") && (
                   <img
                     src={URL.createObjectURL(image)}
@@ -636,42 +922,92 @@ export default function App() {
                   </p>
                 </div>
 
-                <button
+                <motion.button
+                  whileHover={{
+                    scale: 1.08,
+                  }}
+                  whileTap={{
+                    scale: 0.92,
+                  }}
                   onClick={() => setImage(null)}
                   className="ml-auto bg-red-500 px-3 py-2 rounded-xl"
                 >
                   Remove
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             )}
 
             <div className="flex gap-4">
-              <textarea
+              <motion.textarea
+                whileFocus={{
+                  scale: 1.01,
+                }}
                 value={transcript || question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Ask homework question..."
-                className="flex-1 bg-white/10 border border-white/10 rounded-2xl p-4 outline-none resize-none h-20"
+                className="flex-1 bg-white/10 border border-white/10 rounded-2xl p-4 outline-none resize-none h-20 focus:border-blue-400 transition"
               />
 
-              <button
+              <motion.button
+                whileHover={{
+                  scale: 1.1,
+                  rotate: listening ? 0 : 5,
+                }}
+                whileTap={{
+                  scale: 0.9,
+                }}
+                animate={
+                  listening
+                    ? {
+                        scale: [1, 1.15, 1],
+                        boxShadow: [
+                          "0 0 0px rgba(239,68,68,0.5)",
+                          "0 0 30px rgba(239,68,68,0.9)",
+                          "0 0 0px rgba(239,68,68,0.5)",
+                        ],
+                      }
+                    : {}
+                }
+                transition={{
+                  duration: 1,
+                  repeat: listening ? Infinity : 0,
+                }}
                 onClick={() =>
                   SpeechRecognition.startListening({
                     continuous: false,
                   })
                 }
                 className={`px-5 rounded-2xl ${
-                  listening ? "bg-red-500" : "bg-slate-700"
+                  listening
+                    ? "bg-red-500"
+                    : "bg-slate-700 hover:bg-slate-600"
                 }`}
               >
                 🎤
-              </button>
+              </motion.button>
 
               <motion.button
                 whileHover={{
-                  scale: 1.05,
+                  scale: 1.12,
+                  rotate: -5,
                 }}
                 whileTap={{
-                  scale: 0.95,
+                  scale: 0.9,
+                }}
+                animate={
+                  !loading
+                    ? {
+                        boxShadow: [
+                          "0 0 10px rgba(37,99,235,0.5)",
+                          "0 0 35px rgba(37,99,235,0.9)",
+                          "0 0 10px rgba(37,99,235,0.5)",
+                        ],
+                      }
+                    : {}
+                }
+                transition={{
+                  duration: 1.8,
+                  repeat: Infinity,
                 }}
                 onClick={solveHomework}
                 disabled={loading}
@@ -680,7 +1016,7 @@ export default function App() {
                 <FaPaperPlane />
               </motion.button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </MathJaxContext>
