@@ -20,7 +20,6 @@ import {
   FaRocket,
   FaBookOpen,
   FaMagic,
-  FaBolt,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -32,6 +31,7 @@ import SpeechRecognition, {
 
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { useDropzone } from "react-dropzone";
+import { supabase } from "./supabase";
 
 const API_URL = "https://homework-ai-app-jgsw.onrender.com/ai/solve";
 
@@ -119,6 +119,73 @@ export default function App() {
     },
   });
 
+  const getUserId = () => {
+    return localStorage.getItem("homeworkUser") || "guest";
+  };
+
+  const loadFromSupabase = async () => {
+    try {
+      const username = getUserId();
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("username", username)
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        console.log("Supabase load error:", error);
+        loadFromLocalStorage();
+        return;
+      }
+
+      if (data) {
+        setMessages(data.messages || []);
+        setXp(data.xp || 0);
+        setTutorStyle(data.tutor_style || "friendly");
+      } else {
+        loadFromLocalStorage();
+      }
+    } catch (err) {
+      console.log("Supabase load failed:", err);
+      loadFromLocalStorage();
+    }
+  };
+
+  const saveToSupabase = async (newMessages, newXP, newMode) => {
+    try {
+      const username = getUserId();
+
+      const { error } = await supabase.from("profiles").upsert({
+        username,
+        messages: newMessages,
+        xp: newXP,
+        tutor_style: newMode,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.log("Supabase save error:", error);
+      }
+    } catch (err) {
+      console.log("Supabase save failed:", err);
+    }
+  };
+
+  const loadFromLocalStorage = () => {
+    const user = localStorage.getItem("homeworkUser");
+
+    if (!user) return;
+
+    const savedMessages = localStorage.getItem(`chatHistory_${user}`);
+    const savedXP = localStorage.getItem(`xp_${user}`);
+    const savedMode = localStorage.getItem(`mode_${user}`);
+
+    if (savedMessages) setMessages(JSON.parse(savedMessages));
+    if (savedXP) setXp(Number(savedXP));
+    if (savedMode) setTutorStyle(savedMode);
+  };
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -158,25 +225,21 @@ export default function App() {
   }, [messages, isMobile]);
 
   useEffect(() => {
-    const user = localStorage.getItem("homeworkUser");
-    if (!user) return;
+    if (!loggedIn) return;
 
-    const savedMessages = localStorage.getItem(`chatHistory_${user}`);
-    const savedXP = localStorage.getItem(`xp_${user}`);
-    const savedMode = localStorage.getItem(`mode_${user}`);
-
-    if (savedMessages) setMessages(JSON.parse(savedMessages));
-    if (savedXP) setXp(Number(savedXP));
-    if (savedMode) setTutorStyle(savedMode);
-  }, []);
+    loadFromSupabase();
+  }, [loggedIn]);
 
   useEffect(() => {
     const user = localStorage.getItem("homeworkUser");
+
     if (!user) return;
 
     localStorage.setItem(`chatHistory_${user}`, JSON.stringify(messages));
     localStorage.setItem(`xp_${user}`, xp.toString());
     localStorage.setItem(`mode_${user}`, tutorStyle);
+
+    saveToSupabase(messages, xp, tutorStyle);
   }, [messages, xp, tutorStyle]);
 
   const speakText = (text) => {
@@ -286,13 +349,19 @@ export default function App() {
     resetTranscript();
   };
 
-  const clearChat = () => {
+  const clearChat = async () => {
     setMessages([]);
 
     const user = localStorage.getItem("homeworkUser");
 
     if (user) {
       localStorage.removeItem(`chatHistory_${user}`);
+    }
+
+    try {
+      await saveToSupabase([], xp, tutorStyle);
+    } catch (err) {
+      console.log("Clear Supabase failed:", err);
     }
   };
 
