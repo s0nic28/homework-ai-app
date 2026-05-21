@@ -59,7 +59,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 2500);
+    }, 2800);
 
     return () => clearTimeout(timer);
   }, []);
@@ -128,6 +128,9 @@ export default function App() {
       "who is the creator",
       "who owns you",
       "who is mithun",
+      "your creator",
+      "made by who",
+      "built by who",
     ];
 
     const isCreatorQuestion = creatorQuestions.some((q) =>
@@ -215,51 +218,207 @@ export default function App() {
   if (showSplash) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative">
-        <div className="absolute w-[500px] h-[500px] bg-blue-600 opacity-30 blur-3xl rounded-full animate-pulse" />
-        <div className="absolute w-[350px] h-[350px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-10 right-10 animate-pulse" />
+        {/* Moving glow blob 1 */}
+        <motion.div
+          animate={{
+            x: [0, 80, -40, 0],
+            y: [0, -60, 40, 0],
+            scale: [1, 1.2, 0.9, 1],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute w-[550px] h-[550px] bg-blue-600 opacity-30 blur-3xl rounded-full"
+        />
+
+        {/* Moving glow blob 2 */}
+        <motion.div
+          animate={{
+            x: [0, -70, 50, 0],
+            y: [0, 50, -40, 0],
+            scale: [1, 0.8, 1.25, 1],
+          }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute w-[430px] h-[430px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
+        />
+
+        {/* Rotating rings */}
+        <motion.div
+          animate={{
+            rotate: 360,
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute w-[700px] h-[700px] border border-blue-500/20 rounded-full"
+        />
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.7, y: 40 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 text-center"
-        >
+          animate={{
+            rotate: -360,
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute w-[520px] h-[520px] border border-purple-500/20 rounded-full"
+        />
+
+        {/* Floating particles */}
+        {[...Array(18)].map((_, i) => (
           <motion.div
+            key={i}
+            initial={{
+              opacity: 0,
+              y: 80,
+            }}
             animate={{
-              rotate: 360,
+              opacity: [0, 1, 0],
+              y: [-20, -180],
+              x: [0, i % 2 === 0 ? 40 : -40],
             }}
             transition={{
+              duration: 3 + (i % 5),
               repeat: Infinity,
-              duration: 2,
-              ease: "linear",
+              delay: i * 0.2,
+              ease: "easeOut",
             }}
-            className="mx-auto mb-6 w-24 h-24 rounded-3xl bg-blue-600 flex items-center justify-center shadow-2xl"
+            className="absolute w-2 h-2 bg-white/50 rounded-full"
+            style={{
+              left: `${10 + i * 5}%`,
+              bottom: "20%",
+            }}
+          />
+        ))}
+
+        {/* Main splash card */}
+        <motion.div
+          initial={{
+            opacity: 0,
+            scale: 0.75,
+            y: 50,
+          }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 0.8,
+            ease: "easeOut",
+          }}
+          className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-xl rounded-[2rem] px-12 py-10 shadow-2xl"
+        >
+          {/* Robot icon */}
+          <motion.div
+            animate={{
+              y: [0, -12, 0],
+              rotate: [0, 5, -5, 0],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="relative mx-auto mb-8 w-28 h-28 rounded-3xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(59,130,246,0.8)]"
           >
-            <FaRobot size={45} />
+            <FaRobot size={52} />
+
+            <motion.div
+              animate={{
+                scale: [1, 1.35, 1],
+                opacity: [0.7, 0, 0.7],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut",
+              }}
+              className="absolute inset-0 rounded-3xl border-4 border-blue-400"
+            />
           </motion.div>
 
+          {/* Title */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-5xl font-bold"
+            initial={{
+              opacity: 0,
+              y: 25,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              delay: 0.3,
+            }}
+            className="text-6xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
           >
             Homework AI
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-slate-400 mt-3 text-lg"
+            initial={{
+              opacity: 0,
+              y: 15,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              delay: 0.6,
+            }}
+            className="text-slate-300 mt-4 text-lg"
           >
             Made by Mithun
           </motion.p>
 
+          <motion.p
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            transition={{
+              delay: 0.9,
+            }}
+            className="text-slate-500 mt-2 text-sm"
+          >
+            Loading your step-by-step AI tutor...
+          </motion.p>
+
+          {/* Loading dots */}
           <div className="flex justify-center gap-2 mt-8">
-            <div className="w-3 h-3 bg-white rounded-full animate-bounce" />
-            <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-100" />
-            <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-200" />
+            <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
+            <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
+            <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-200" />
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-8 w-72 h-2 bg-white/10 rounded-full overflow-hidden mx-auto">
+            <motion.div
+              initial={{
+                width: "0%",
+              }}
+              animate={{
+                width: "100%",
+              }}
+              transition={{
+                duration: 2.5,
+                ease: "easeInOut",
+              }}
+              className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
+            />
           </div>
         </motion.div>
       </div>
@@ -292,6 +451,7 @@ export default function App() {
         <div className="absolute w-[400px] h-[400px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-100px] right-[-100px]" />
 
         <div className="relative z-10 flex flex-col h-screen">
+          {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg">
             <div className="flex items-center gap-4">
               <div className="bg-blue-600 p-4 rounded-2xl">
@@ -341,6 +501,7 @@ export default function App() {
             </div>
           </div>
 
+          {/* Achievements */}
           <div className="p-4 flex gap-4 overflow-x-auto">
             {achievements.map((a, i) => (
               <div
@@ -354,6 +515,7 @@ export default function App() {
             ))}
           </div>
 
+          {/* Chat */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {messages.length === 0 && (
               <div className="text-center text-slate-400 mt-20">
@@ -446,6 +608,7 @@ export default function App() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Input */}
           <div className="p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg">
             <div
               {...getRootProps()}
