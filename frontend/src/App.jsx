@@ -17,6 +17,9 @@ import {
   FaGamepad,
   FaGraduationCap,
   FaLightbulb,
+  FaBolt,
+  FaBookOpen,
+  FaStar,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -39,6 +42,7 @@ export default function App() {
   const [xp, setXp] = useState(0);
   const [image, setImage] = useState(null);
   const [tutorStyle, setTutorStyle] = useState("friendly");
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const [loggedIn, setLoggedIn] = useState(
     !!localStorage.getItem("homeworkUser")
@@ -102,9 +106,24 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 2800);
+    }, 3300);
 
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const moveCursor = (e) => {
+      setCursorPos({
+        x: e.clientX,
+        y: e.clientY,
+      });
+    };
+
+    window.addEventListener("mousemove", moveCursor);
+
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+    };
   }, []);
 
   useEffect(() => {
@@ -264,191 +283,312 @@ export default function App() {
     setLoggedIn(false);
   };
 
+  const GlobalEffects = () => (
+    <>
+      <style>
+        {`
+          * {
+            cursor: none;
+          }
+
+          *::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+          }
+
+          * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+
+          body {
+            overflow: hidden;
+          }
+
+          .animated-grid {
+            background-image:
+              linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 45px 45px;
+          }
+        `}
+      </style>
+
+      <motion.div
+        className="fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-[9999] border border-blue-300/80 mix-blend-difference hidden md:block"
+        animate={{
+          x: cursorPos.x - 16,
+          y: cursorPos.y - 16,
+          scale: [1, 1.25, 1],
+        }}
+        transition={{
+          x: { duration: 0.08 },
+          y: { duration: 0.08 },
+          scale: {
+            duration: 1.2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }}
+      />
+
+      <motion.div
+        className="fixed top-0 left-0 w-2 h-2 rounded-full pointer-events-none z-[9999] bg-blue-300 hidden md:block"
+        animate={{
+          x: cursorPos.x - 4,
+          y: cursorPos.y - 4,
+        }}
+        transition={{
+          x: { duration: 0.02 },
+          y: { duration: 0.02 },
+        }}
+      />
+    </>
+  );
+
   if (showSplash) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative">
-        <motion.div
-          animate={{
-            x: [0, 80, -40, 0],
-            y: [0, -60, 40, 0],
-            scale: [1, 1.2, 0.9, 1],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute w-[550px] h-[550px] bg-blue-600 opacity-30 blur-3xl rounded-full"
-        />
+      <>
+        <GlobalEffects />
 
-        <motion.div
-          animate={{
-            x: [0, -70, 50, 0],
-            y: [0, 50, -40, 0],
-            scale: [1, 0.8, 1.25, 1],
-          }}
-          transition={{
-            duration: 7,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute w-[430px] h-[430px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
-        />
-
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute w-[700px] h-[700px] border border-blue-500/20 rounded-full"
-        />
-
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute w-[520px] h-[520px] border border-purple-500/20 rounded-full"
-        />
-
-        {[...Array(22)].map((_, i) => (
+        <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative animated-grid">
           <motion.div
-            key={i}
-            initial={{
-              opacity: 0,
-              y: 80,
-            }}
             animate={{
-              opacity: [0, 1, 0],
-              y: [-20, -200],
-              x: [0, i % 2 === 0 ? 45 : -45],
+              backgroundPosition: ["0px 0px", "120px 120px"],
             }}
             transition={{
-              duration: 3 + (i % 5),
+              duration: 5,
               repeat: Infinity,
-              delay: i * 0.18,
-              ease: "easeOut",
+              ease: "linear",
             }}
-            className="absolute w-2 h-2 bg-white/50 rounded-full"
-            style={{
-              left: `${8 + i * 4}%`,
-              bottom: "20%",
-            }}
+            className="absolute inset-0 animated-grid opacity-40"
           />
-        ))}
 
-        <motion.div
-          initial={{
-            opacity: 0,
-            scale: 0.75,
-            y: 50,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 0.8,
-            ease: "easeOut",
-          }}
-          className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-xl rounded-[2rem] px-12 py-10 shadow-2xl"
-        >
           <motion.div
             animate={{
-              y: [0, -12, 0],
-              rotate: [0, 5, -5, 0],
+              x: [0, 100, -80, 0],
+              y: [0, -80, 60, 0],
+              scale: [1, 1.25, 0.85, 1],
             }}
             transition={{
-              duration: 2.5,
+              duration: 7,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="relative mx-auto mb-8 w-28 h-28 rounded-3xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-[0_0_60px_rgba(59,130,246,0.8)]"
-          >
-            <FaRobot size={52} />
+            className="absolute w-[650px] h-[650px] bg-blue-600 opacity-30 blur-3xl rounded-full"
+          />
 
+          <motion.div
+            animate={{
+              x: [0, -90, 70, 0],
+              y: [0, 70, -60, 0],
+              scale: [1, 0.8, 1.3, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute w-[500px] h-[500px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
+          />
+
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 16,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute w-[760px] h-[760px] border border-blue-500/20 rounded-full"
+          />
+
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{
+              duration: 24,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute w-[560px] h-[560px] border border-purple-500/25 rounded-full"
+          />
+
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 11,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute w-[390px] h-[390px] border border-pink-500/20 rounded-full"
+          />
+
+          {[...Array(32)].map((_, i) => (
             <motion.div
+              key={i}
+              initial={{
+                opacity: 0,
+                y: 120,
+              }}
               animate={{
-                scale: [1, 1.35, 1],
-                opacity: [0.7, 0, 0.7],
+                opacity: [0, 1, 0],
+                y: [-20, -260],
+                x: [0, i % 2 === 0 ? 60 : -60],
+                scale: [0.7, 1.4, 0.4],
               }}
               transition={{
-                duration: 2,
+                duration: 3 + (i % 6),
                 repeat: Infinity,
+                delay: i * 0.12,
                 ease: "easeOut",
               }}
-              className="absolute inset-0 rounded-3xl border-4 border-blue-400"
+              className="absolute w-2 h-2 bg-white/50 rounded-full"
+              style={{
+                left: `${5 + i * 3}%`,
+                bottom: "15%",
+              }}
             />
-          </motion.div>
+          ))}
 
-          <motion.h1
+          <motion.div
             initial={{
               opacity: 0,
-              y: 25,
+              scale: 0.65,
+              y: 80,
+              rotateX: 25,
             }}
             animate={{
               opacity: 1,
+              scale: 1,
               y: 0,
+              rotateX: 0,
             }}
-            transition={{ delay: 0.3 }}
-            className="text-6xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-          >
-            Homework AI
-          </motion.h1>
-
-          <motion.p
-            initial={{
-              opacity: 0,
-              y: 15,
+            transition={{
+              duration: 1,
+              ease: "easeOut",
             }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{ delay: 0.6 }}
-            className="text-slate-300 mt-4 text-lg"
+            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-2xl rounded-[2.5rem] px-14 py-12 shadow-[0_0_120px_rgba(59,130,246,0.35)]"
           >
-            Made by Mithun
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
-            className="text-slate-500 mt-2 text-sm"
-          >
-            Loading your step-by-step AI tutor...
-          </motion.p>
-
-          <div className="flex justify-center gap-2 mt-8">
-            <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
-            <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
-            <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-200" />
-          </div>
-
-          <div className="mt-8 w-72 h-2 bg-white/10 rounded-full overflow-hidden mx-auto">
             <motion.div
-              initial={{ width: "0%" }}
-              animate={{ width: "100%" }}
+              animate={{
+                y: [0, -16, 0],
+                rotate: [0, 6, -6, 0],
+              }}
               transition={{
-                duration: 2.5,
+                duration: 2.4,
+                repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
-            />
-          </div>
-        </motion.div>
-      </div>
+              className="relative mx-auto mb-8 w-32 h-32 rounded-[2rem] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-[0_0_80px_rgba(147,51,234,0.9)]"
+            >
+              <FaRobot size={60} />
+
+              <motion.div
+                animate={{
+                  scale: [1, 1.45, 1],
+                  opacity: [0.75, 0, 0.75],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                }}
+                className="absolute inset-0 rounded-[2rem] border-4 border-blue-300"
+              />
+
+              <motion.div
+                animate={{
+                  scale: [1, 1.9, 1],
+                  opacity: [0.45, 0, 0.45],
+                }}
+                transition={{
+                  duration: 2.6,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                }}
+                className="absolute inset-0 rounded-[2rem] border-2 border-pink-300"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 25 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="flex justify-center gap-3 text-blue-300 mb-4"
+            >
+              <FaBolt />
+              <FaBookOpen />
+              <FaStar />
+            </motion.div>
+
+            <motion.h1
+              initial={{
+                opacity: 0,
+                y: 25,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{ delay: 0.35 }}
+              className="text-6xl md:text-7xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+            >
+              Homework AI
+            </motion.h1>
+
+            <motion.p
+              initial={{
+                opacity: 0,
+                y: 15,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{ delay: 0.65 }}
+              className="text-slate-300 mt-4 text-lg"
+            >
+              Made by Mithun
+            </motion.p>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.9 }}
+              className="text-slate-500 mt-2 text-sm"
+            >
+              Starting your step-by-step AI tutor engine...
+            </motion.p>
+
+            <div className="flex justify-center gap-2 mt-8">
+              <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
+              <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
+              <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-200" />
+            </div>
+
+            <div className="mt-8 w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto">
+              <motion.div
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{
+                  duration: 3,
+                  ease: "easeInOut",
+                }}
+                className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </>
     );
   }
 
   if (!loggedIn) {
-    return <Login setLoggedIn={setLoggedIn} />;
+    return (
+      <>
+        <GlobalEffects />
+        <Login setLoggedIn={setLoggedIn} />
+      </>
+    );
   }
 
   const achievements = [
@@ -468,7 +608,21 @@ export default function App() {
 
   return (
     <MathJaxContext>
-      <div className="min-h-screen bg-black text-white overflow-hidden relative">
+      <GlobalEffects />
+
+      <div className="min-h-screen bg-black text-white overflow-hidden relative animated-grid">
+        <motion.div
+          animate={{
+            backgroundPosition: ["0px 0px", "100px 100px"],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute inset-0 animated-grid opacity-20"
+        />
+
         <motion.div
           animate={{
             x: [0, 60, -40, 0],
@@ -551,7 +705,18 @@ export default function App() {
                 whileHover={{
                   scale: 1.08,
                 }}
-                className="bg-yellow-500 text-black px-4 py-2 rounded-xl font-bold shadow-[0_0_25px_rgba(234,179,8,0.6)]"
+                animate={{
+                  boxShadow: [
+                    "0 0 10px rgba(234,179,8,0.3)",
+                    "0 0 28px rgba(234,179,8,0.8)",
+                    "0 0 10px rgba(234,179,8,0.3)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                }}
+                className="bg-yellow-500 text-black px-4 py-2 rounded-xl font-bold"
               >
                 XP: {xp}
               </motion.div>
@@ -573,6 +738,7 @@ export default function App() {
               <motion.button
                 whileHover={{
                   scale: 1.08,
+                  y: -2,
                 }}
                 whileTap={{
                   scale: 0.95,
@@ -605,52 +771,79 @@ export default function App() {
             </p>
 
             <div className="flex gap-4 overflow-x-auto pb-2">
-              {tutorModes.map((mode) => (
-                <motion.button
-                  key={mode.id}
-                  onClick={() => setTutorStyle(mode.id)}
-                  whileHover={{
-                    scale: 1.08,
-                    y: -5,
-                  }}
-                  whileTap={{
-                    scale: 0.92,
-                  }}
-                  animate={
-                    tutorStyle === mode.id
-                      ? {
-                          y: [0, -4, 0],
-                          boxShadow: [
-                            "0 0 0px rgba(255,255,255,0.2)",
-                            "0 0 28px rgba(255,255,255,0.35)",
-                            "0 0 0px rgba(255,255,255,0.2)",
-                          ],
-                        }
-                      : {}
-                  }
-                  transition={{
-                    duration: 1.8,
-                    repeat: tutorStyle === mode.id ? Infinity : 0,
-                  }}
-                  className={`min-w-[150px] p-4 rounded-2xl border transition relative overflow-hidden ${
-                    tutorStyle === mode.id
-                      ? "border-white/40 bg-white/15"
-                      : "border-white/10 bg-white/5 hover:bg-white/10"
-                  }`}
-                >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${mode.gradient} opacity-${
-                      tutorStyle === mode.id ? "30" : "10"
-                    }`}
-                  />
+              {tutorModes.map((mode) => {
+                const selected = tutorStyle === mode.id;
 
-                  <div className="relative z-10">
-                    <div className="text-2xl mb-2">{mode.icon}</div>
-                    <p className="font-bold">{mode.name}</p>
-                    <p className="text-xs text-slate-300">{mode.desc}</p>
-                  </div>
-                </motion.button>
-              ))}
+                return (
+                  <motion.button
+                    key={mode.id}
+                    onClick={() => setTutorStyle(mode.id)}
+                    whileHover={{
+                      scale: 1.08,
+                      y: -5,
+                    }}
+                    whileTap={{
+                      scale: 0.92,
+                    }}
+                    animate={
+                      selected
+                        ? {
+                            y: [0, -4, 0],
+                            boxShadow: [
+                              "0 0 0px rgba(255,255,255,0.2)",
+                              "0 0 28px rgba(255,255,255,0.35)",
+                              "0 0 0px rgba(255,255,255,0.2)",
+                            ],
+                          }
+                        : {}
+                    }
+                    transition={{
+                      duration: 1.8,
+                      repeat: selected ? Infinity : 0,
+                    }}
+                    className={`min-w-[150px] p-4 rounded-2xl border transition relative overflow-hidden ${
+                      selected
+                        ? "border-white/40 bg-white/15"
+                        : "border-white/10 bg-white/5 hover:bg-white/10"
+                    }`}
+                  >
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${
+                        mode.gradient
+                      } ${selected ? "opacity-30" : "opacity-10"}`}
+                    />
+
+                    {selected && (
+                      <motion.div
+                        layoutId="modeGlow"
+                        className="absolute inset-0 rounded-2xl border border-white/40"
+                      />
+                    )}
+
+                    <div className="relative z-10">
+                      <motion.div
+                        animate={
+                          selected
+                            ? {
+                                rotate: [0, 8, -8, 0],
+                                scale: [1, 1.15, 1],
+                              }
+                            : {}
+                        }
+                        transition={{
+                          duration: 1.5,
+                          repeat: selected ? Infinity : 0,
+                        }}
+                        className="text-2xl mb-2"
+                      >
+                        {mode.icon}
+                      </motion.div>
+                      <p className="font-bold">{mode.name}</p>
+                      <p className="text-xs text-slate-300">{mode.desc}</p>
+                    </div>
+                  </motion.button>
+                );
+              })}
             </div>
           </motion.div>
 
@@ -775,7 +968,7 @@ export default function App() {
                         <Typewriter
                           words={[msg.text]}
                           loop={1}
-                          cursor
+                          cursor={false}
                           typeSpeed={10}
                         />
                       </div>
@@ -868,7 +1061,6 @@ export default function App() {
                 isDragActive
                   ? {
                       scale: 1.03,
-                      borderColor: "rgba(96,165,250,0.9)",
                     }
                   : {}
               }
