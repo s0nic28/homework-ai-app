@@ -1,10 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-} from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
 import {
@@ -24,7 +20,6 @@ import {
   FaBookOpen,
   FaStar,
   FaRocket,
-  FaMagic,
   FaGem,
 } from "react-icons/fa";
 
@@ -68,8 +63,7 @@ export default function App() {
     damping: 40,
   });
 
-  const { transcript, listening, resetTranscript } =
-    useSpeechRecognition();
+  const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
   const tutorModes = [
     {
@@ -330,12 +324,17 @@ export default function App() {
               0 0 40px rgba(168,85,247,0.6),
               0 0 80px rgba(236,72,153,0.4);
           }
+
+          @media (max-width: 768px) {
+            .custom-cursor {
+              display: none;
+            }
+          }
         `}
       </style>
 
-      {/* Smooth cursor glow, no glitch */}
       <motion.div
-        className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[9999] hidden md:block"
+        className="custom-cursor fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[9999]"
         style={{
           x: smoothX,
           y: smoothY,
@@ -358,7 +357,7 @@ export default function App() {
       </motion.div>
 
       <motion.div
-        className="fixed top-0 left-0 w-3 h-3 rounded-full pointer-events-none z-[9999] bg-cyan-300 hidden md:block shadow-[0_0_20px_rgba(103,232,249,1)]"
+        className="custom-cursor fixed top-0 left-0 w-3 h-3 rounded-full pointer-events-none z-[9999] bg-cyan-300 shadow-[0_0_20px_rgba(103,232,249,1)]"
         style={{
           x: cursorX,
           y: cursorY,
@@ -404,7 +403,7 @@ export default function App() {
       <>
         <GlobalEffects />
 
-        <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative animated-grid">
+        <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative animated-grid px-4">
           <motion.div
             animate={{
               backgroundPosition: ["0px 0px", "160px 160px"],
@@ -417,7 +416,6 @@ export default function App() {
             className="absolute inset-0 animated-grid opacity-40"
           />
 
-          {/* Insane aurora background */}
           <motion.div
             animate={{
               x: [0, 130, -90, 0],
@@ -429,7 +427,7 @@ export default function App() {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute w-[760px] h-[760px] bg-blue-600 opacity-30 blur-3xl rounded-full"
+            className="absolute w-[420px] h-[420px] md:w-[760px] md:h-[760px] bg-blue-600 opacity-30 blur-3xl rounded-full"
           />
 
           <motion.div
@@ -443,7 +441,7 @@ export default function App() {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute w-[620px] h-[620px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
+            className="absolute w-[360px] h-[360px] md:w-[620px] md:h-[620px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
           />
 
           <motion.div
@@ -457,10 +455,9 @@ export default function App() {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute w-[500px] h-[500px] bg-pink-500 opacity-20 blur-3xl rounded-full top-20 right-20"
+            className="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-pink-500 opacity-20 blur-3xl rounded-full top-20 right-20"
           />
 
-          {/* Rotating energy rings */}
           {[900, 720, 540, 360].map((size, i) => (
             <motion.div
               key={size}
@@ -488,7 +485,6 @@ export default function App() {
             />
           ))}
 
-          {/* Better insane stars */}
           <SplashStar delay={0.1} left="12%" top="22%" size="text-2xl" />
           <SplashStar delay={0.5} left="80%" top="18%" size="text-xl" />
           <SplashStar delay={0.9} left="18%" top="72%" size="text-xl" />
@@ -496,7 +492,6 @@ export default function App() {
           <SplashStar delay={1.7} left="50%" top="14%" size="text-lg" />
           <SplashStar delay={2.1} left="42%" top="80%" size="text-xl" />
 
-          {/* Particles */}
           {[...Array(42)].map((_, i) => (
             <motion.div
               key={i}
@@ -524,7 +519,6 @@ export default function App() {
             />
           ))}
 
-          {/* Main splash card */}
           <motion.div
             initial={{
               opacity: 0,
@@ -542,7 +536,7 @@ export default function App() {
               duration: 1,
               ease: "easeOut",
             }}
-            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-2xl rounded-[2.8rem] px-14 py-12 shadow-[0_0_150px_rgba(147,51,234,0.45)]"
+            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-2xl rounded-[2rem] md:rounded-[2.8rem] px-6 md:px-14 py-8 md:py-12 shadow-[0_0_150px_rgba(147,51,234,0.45)] w-full max-w-xl"
           >
             <motion.div
               animate={{
@@ -555,9 +549,9 @@ export default function App() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="relative mx-auto mb-8 w-36 h-36 rounded-[2.3rem] bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-700 flex items-center justify-center shadow-[0_0_100px_rgba(59,130,246,1)]"
+              className="relative mx-auto mb-8 w-28 h-28 md:w-36 md:h-36 rounded-[2rem] md:rounded-[2.3rem] bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-700 flex items-center justify-center shadow-[0_0_100px_rgba(59,130,246,1)]"
             >
-              <FaBrain size={68} />
+              <FaBrain size={56} className="md:text-[68px]" />
 
               <motion.div
                 animate={{
@@ -569,7 +563,7 @@ export default function App() {
                   repeat: Infinity,
                   ease: "easeOut",
                 }}
-                className="absolute inset-0 rounded-[2.3rem] border-4 border-cyan-300"
+                className="absolute inset-0 rounded-[2rem] md:rounded-[2.3rem] border-4 border-cyan-300"
               />
 
               <motion.div
@@ -583,7 +577,7 @@ export default function App() {
                   repeat: Infinity,
                   ease: "easeOut",
                 }}
-                className="absolute inset-0 rounded-[2.3rem] border-2 border-pink-300"
+                className="absolute inset-0 rounded-[2rem] md:rounded-[2.3rem] border-2 border-pink-300"
               />
             </motion.div>
 
@@ -591,7 +585,7 @@ export default function App() {
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="flex justify-center gap-5 text-yellow-300 mb-5 text-2xl"
+              className="flex justify-center gap-5 text-yellow-300 mb-5 text-xl md:text-2xl"
             >
               {[FaBolt, FaBookOpen, FaStar, FaRocket, FaGem].map((Icon, i) => (
                 <motion.div
@@ -623,7 +617,7 @@ export default function App() {
                 y: 0,
               }}
               transition={{ delay: 0.35 }}
-              className="text-6xl md:text-8xl font-black bg-gradient-to-r from-cyan-300 via-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-glow"
+              className="text-5xl md:text-8xl font-black bg-gradient-to-r from-cyan-300 via-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-glow"
             >
               Homework AI
             </motion.h1>
@@ -638,7 +632,7 @@ export default function App() {
                 y: 0,
               }}
               transition={{ delay: 0.65 }}
-              className="text-slate-200 mt-5 text-xl"
+              className="text-slate-200 mt-5 text-lg md:text-xl"
             >
               Made by Mithun
             </motion.p>
@@ -658,7 +652,7 @@ export default function App() {
               <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-200" />
             </div>
 
-            <div className="mt-9 w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+            <div className="mt-9 w-full max-w-xs md:max-w-sm h-3 bg-white/10 rounded-full overflow-hidden mx-auto shadow-[0_0_30px_rgba(255,255,255,0.15)]">
               <motion.div
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
@@ -755,7 +749,7 @@ export default function App() {
             transition={{
               duration: 0.7,
             }}
-            className="flex items-center justify-between p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg"
+            className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 md:p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg"
           >
             <div className="flex items-center gap-4">
               <motion.div
@@ -781,7 +775,7 @@ export default function App() {
                     opacity: 1,
                     x: 0,
                   }}
-                  className="text-3xl font-bold"
+                  className="text-2xl md:text-3xl font-bold"
                 >
                   Homework AI
                 </motion.h1>
@@ -793,7 +787,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3 flex-wrap justify-center md:justify-end">
               <motion.div
                 whileHover={{
                   scale: 1.08,
@@ -837,7 +831,7 @@ export default function App() {
                   scale: 0.95,
                 }}
                 onClick={logout}
-                className="bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl font-bold"
+                className="bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-xl font-bold text-sm md:text-base"
               >
                 Logout
               </motion.button>
@@ -894,7 +888,7 @@ export default function App() {
                       duration: 1.8,
                       repeat: selected ? Infinity : 0,
                     }}
-                    className={`min-w-[150px] p-4 rounded-2xl border transition relative overflow-hidden ${
+                    className={`min-w-[130px] md:min-w-[150px] p-3 md:p-4 rounded-2xl border transition relative overflow-hidden ${
                       selected
                         ? "border-white/40 bg-white/15"
                         : "border-white/10 bg-white/5 hover:bg-white/10"
@@ -940,7 +934,7 @@ export default function App() {
             </div>
           </motion.div>
 
-          <div className="p-4 flex gap-4 overflow-x-auto">
+          <div className="p-3 md:p-4 flex gap-3 md:gap-4 overflow-x-auto">
             {achievements.map((a, i) => (
               <motion.div
                 key={i}
@@ -959,7 +953,7 @@ export default function App() {
                   scale: 1.08,
                   y: -4,
                 }}
-                className={`px-4 py-2 rounded-xl whitespace-nowrap ${
+                className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm md:text-base ${
                   a.unlocked
                     ? "bg-green-500 shadow-[0_0_25px_rgba(34,197,94,0.6)]"
                     : "bg-slate-700"
@@ -970,7 +964,7 @@ export default function App() {
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
             {messages.length === 0 && (
               <motion.div
                 initial={{
@@ -981,7 +975,7 @@ export default function App() {
                   opacity: 1,
                   y: 0,
                 }}
-                className="text-center text-slate-400 mt-20"
+                className="text-center text-slate-400 mt-16 md:mt-20"
               >
                 <motion.h2
                   animate={{
@@ -991,11 +985,13 @@ export default function App() {
                     duration: 2,
                     repeat: Infinity,
                   }}
-                  className="text-3xl font-bold mb-3 text-white"
+                  className="text-2xl md:text-3xl font-bold mb-3 text-white"
                 >
                   Ask your first homework question
                 </motion.h2>
-                <p>Type a question, use the mic, or upload homework.</p>
+                <p className="text-sm md:text-base">
+                  Type a question, use the mic, or upload homework.
+                </p>
                 <p className="mt-3 text-sm text-slate-500">
                   Made by Mithun
                 </p>
@@ -1027,7 +1023,7 @@ export default function App() {
                   whileHover={{
                     scale: 1.01,
                   }}
-                  className={`max-w-[85%] md:max-w-[70%] rounded-3xl p-5 shadow-lg ${
+                  className={`max-w-[92%] md:max-w-[70%] rounded-3xl p-4 md:p-5 shadow-lg text-sm md:text-base ${
                     msg.type === "user"
                       ? "bg-blue-600 shadow-[0_0_25px_rgba(37,99,235,0.4)]"
                       : "bg-white/10 backdrop-blur-lg border border-white/10 shadow-[0_0_25px_rgba(255,255,255,0.08)]"
@@ -1071,7 +1067,7 @@ export default function App() {
                   </MathJax>
 
                   {msg.type === "ai" && (
-                    <div className="flex gap-3 mt-4">
+                    <div className="flex gap-3 mt-4 flex-wrap">
                       <motion.button
                         whileHover={{
                           scale: 1.08,
@@ -1143,7 +1139,7 @@ export default function App() {
             transition={{
               delay: 0.3,
             }}
-            className="p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg"
+            className="p-4 md:p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg"
           >
             <motion.div
               {...getRootProps()}
@@ -1157,7 +1153,7 @@ export default function App() {
                     }
                   : {}
               }
-              className={`border-2 border-dashed rounded-2xl p-4 mb-4 cursor-pointer text-center transition ${
+              className={`border-2 border-dashed rounded-2xl p-3 md:p-4 mb-4 cursor-pointer text-center transition text-sm md:text-base ${
                 isDragActive
                   ? "border-blue-400 bg-blue-500/20"
                   : "border-white/20 hover:bg-white/5"
@@ -1196,13 +1192,13 @@ export default function App() {
                   <img
                     src={URL.createObjectURL(image)}
                     alt="preview"
-                    className="w-24 rounded-xl"
+                    className="w-20 md:w-24 rounded-xl"
                   />
                 )}
 
                 <div>
-                  <p className="font-bold">{image.name}</p>
-                  <p className="text-slate-400 text-sm">
+                  <p className="font-bold text-sm md:text-base">{image.name}</p>
+                  <p className="text-slate-400 text-xs md:text-sm">
                     Ready to upload
                   </p>
                 </div>
@@ -1215,14 +1211,14 @@ export default function App() {
                     scale: 0.92,
                   }}
                   onClick={() => setImage(null)}
-                  className="ml-auto bg-red-500 px-3 py-2 rounded-xl"
+                  className="ml-auto bg-red-500 px-3 py-2 rounded-xl text-sm"
                 >
                   Remove
                 </motion.button>
               </motion.div>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex gap-3 md:gap-4">
               <motion.textarea
                 whileFocus={{
                   scale: 1.01,
@@ -1230,7 +1226,7 @@ export default function App() {
                 value={transcript || question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Ask homework question..."
-                className="flex-1 bg-white/10 border border-white/10 rounded-2xl p-4 outline-none resize-none h-20 focus:border-blue-400 transition"
+                className="flex-1 bg-white/10 border border-white/10 rounded-2xl p-3 md:p-4 outline-none resize-none h-16 md:h-20 focus:border-blue-400 transition text-sm md:text-base"
               />
 
               <motion.button
@@ -1262,7 +1258,7 @@ export default function App() {
                     continuous: false,
                   })
                 }
-                className={`px-5 rounded-2xl ${
+                className={`px-4 md:px-5 rounded-2xl ${
                   listening
                     ? "bg-red-500"
                     : "bg-slate-700 hover:bg-slate-600"
@@ -1296,7 +1292,7 @@ export default function App() {
                 }}
                 onClick={solveHomework}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 px-6 rounded-2xl text-2xl"
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 px-4 md:px-6 rounded-2xl text-xl md:text-2xl"
               >
                 <FaPaperPlane />
               </motion.button>
