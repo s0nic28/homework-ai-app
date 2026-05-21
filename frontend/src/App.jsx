@@ -13,7 +13,6 @@ import {
 } from "react-icons/fa";
 
 import Login from "./Login";
-
 import { Typewriter } from "react-simple-typewriter";
 
 import SpeechRecognition, {
@@ -23,10 +22,11 @@ import SpeechRecognition, {
 import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { useDropzone } from "react-dropzone";
 
-// CHANGE THIS TO YOUR REAL RENDER BACKEND URL
+// IMPORTANT: keep /ai/solve at the end
 const API_URL = "https://homework-ai-app-jgsw.onrender.com/ai/solve";
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -54,6 +54,14 @@ export default function App() {
       }
     },
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -167,6 +175,60 @@ export default function App() {
     localStorage.removeItem("homeworkUser");
     setLoggedIn(false);
   };
+
+  if (showSplash) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative">
+        <div className="absolute w-[500px] h-[500px] bg-blue-600 opacity-30 blur-3xl rounded-full animate-pulse" />
+        <div className="absolute w-[350px] h-[350px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-10 right-10 animate-pulse" />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7, y: 40 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 text-center"
+        >
+          <motion.div
+            animate={{
+              rotate: 360,
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              ease: "linear",
+            }}
+            className="mx-auto mb-6 w-24 h-24 rounded-3xl bg-blue-600 flex items-center justify-center shadow-2xl"
+          >
+            <FaRobot size={45} />
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-5xl font-bold"
+          >
+            Homework AI
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-slate-400 mt-3 text-lg"
+          >
+            Preparing your AI tutor...
+          </motion.p>
+
+          <div className="flex justify-center gap-2 mt-8">
+            <div className="w-3 h-3 bg-white rounded-full animate-bounce" />
+            <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-100" />
+            <div className="w-3 h-3 bg-white rounded-full animate-bounce delay-200" />
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (!loggedIn) {
     return <Login setLoggedIn={setLoggedIn} />;
