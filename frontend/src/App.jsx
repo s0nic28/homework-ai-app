@@ -34,6 +34,7 @@ import { useDropzone } from "react-dropzone";
 const API_URL = "https://homework-ai-app-jgsw.onrender.com/ai/solve";
 
 export default function App() {
+  const [isMobile, setIsMobile] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
@@ -114,14 +115,29 @@ export default function App() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2600);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
 
-    return () => clearTimeout(timer);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
   }, []);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, isMobile ? 1200 : 2600);
+
+    return () => clearTimeout(timer);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile) return;
+
     const moveCursor = (e) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
@@ -132,13 +148,13 @@ export default function App() {
     return () => {
       window.removeEventListener("mousemove", moveCursor);
     };
-  }, [cursorX, cursorY]);
+  }, [cursorX, cursorY, isMobile]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
+      behavior: isMobile ? "auto" : "smooth",
     });
-  }, [messages]);
+  }, [messages, isMobile]);
 
   useEffect(() => {
     const user = localStorage.getItem("homeworkUser");
@@ -310,15 +326,15 @@ export default function App() {
 
           .animated-grid {
             background-image:
-              linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
             background-size: 44px 44px;
           }
 
           .text-glow {
             text-shadow:
-              0 0 18px rgba(96,165,250,0.75),
-              0 0 35px rgba(168,85,247,0.45);
+              0 0 14px rgba(96,165,250,0.65),
+              0 0 24px rgba(168,85,247,0.35);
           }
 
           @media (max-width: 768px) {
@@ -326,119 +342,141 @@ export default function App() {
               display: none;
             }
 
-            .mobile-reduce-blur {
-              filter: blur(45px);
+            .mobile-hide {
+              display: none;
+            }
+
+            .mobile-soft-blur {
+              filter: blur(35px);
             }
           }
         `}
       </style>
 
-      <motion.div
-        className="custom-cursor fixed top-0 left-0 w-10 h-10 rounded-full pointer-events-none z-[9999]"
-        style={{
-          x: smoothX,
-          y: smoothY,
-          translateX: "-50%",
-          translateY: "-50%",
-        }}
-      >
-        <motion.div
-          animate={{
-            scale: [1, 1.25, 1],
-            opacity: [0.45, 0.2, 0.45],
-          }}
-          transition={{
-            duration: 1.4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="w-full h-full rounded-full border border-blue-300/60 shadow-[0_0_25px_rgba(96,165,250,0.8)]"
-        />
-      </motion.div>
+      {!isMobile && (
+        <>
+          <motion.div
+            className="custom-cursor fixed top-0 left-0 w-10 h-10 rounded-full pointer-events-none z-[9999]"
+            style={{
+              x: smoothX,
+              y: smoothY,
+              translateX: "-50%",
+              translateY: "-50%",
+            }}
+          >
+            <motion.div
+              animate={{
+                scale: [1, 1.25, 1],
+                opacity: [0.45, 0.2, 0.45],
+              }}
+              transition={{
+                duration: 1.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="w-full h-full rounded-full border border-blue-300/60 shadow-[0_0_25px_rgba(96,165,250,0.8)]"
+            />
+          </motion.div>
 
-      <motion.div
-        className="custom-cursor fixed top-0 left-0 w-2.5 h-2.5 rounded-full pointer-events-none z-[9999] bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,1)]"
-        style={{
-          x: cursorX,
-          y: cursorY,
-          translateX: "-50%",
-          translateY: "-50%",
-        }}
-      />
+          <motion.div
+            className="custom-cursor fixed top-0 left-0 w-2.5 h-2.5 rounded-full pointer-events-none z-[9999] bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,1)]"
+            style={{
+              x: cursorX,
+              y: cursorY,
+              translateX: "-50%",
+              translateY: "-50%",
+            }}
+          />
+        </>
+      )}
     </>
   );
 
   if (showSplash) {
-    const splashParticles = window.innerWidth < 768 ? 14 : 36;
+    const splashParticles = isMobile ? 0 : 24;
 
     return (
       <>
         <GlobalEffects />
 
-        <div className="app-height bg-black text-white flex items-center justify-center overflow-hidden relative animated-grid px-4">
-          <motion.div
-            animate={{
-              backgroundPosition: ["0px 0px", "120px 120px"],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute inset-0 animated-grid opacity-30"
-          />
+        <div className="app-height bg-black text-white flex items-center justify-center overflow-hidden relative px-4">
+          {!isMobile && (
+            <motion.div
+              animate={{
+                backgroundPosition: ["0px 0px", "120px 120px"],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="absolute inset-0 animated-grid opacity-30"
+            />
+          )}
 
           <motion.div
-            animate={{
-              x: [0, 80, -60, 0],
-              y: [0, -70, 40, 0],
-              scale: [1, 1.25, 0.9, 1],
-            }}
+            animate={
+              isMobile
+                ? {}
+                : {
+                    x: [0, 80, -60, 0],
+                    y: [0, -70, 40, 0],
+                    scale: [1, 1.25, 0.9, 1],
+                  }
+            }
             transition={{
               duration: 7,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="mobile-reduce-blur absolute w-[360px] h-[360px] md:w-[760px] md:h-[760px] bg-blue-600 opacity-30 blur-3xl rounded-full"
+            className="mobile-soft-blur absolute w-[320px] h-[320px] md:w-[760px] md:h-[760px] bg-blue-600 opacity-25 blur-3xl rounded-full"
           />
 
           <motion.div
-            animate={{
-              x: [0, -70, 60, 0],
-              y: [0, 70, -50, 0],
-              scale: [1, 0.8, 1.25, 1],
-            }}
+            animate={
+              isMobile
+                ? {}
+                : {
+                    x: [0, -70, 60, 0],
+                    y: [0, 70, -50, 0],
+                    scale: [1, 0.8, 1.25, 1],
+                  }
+            }
             transition={{
               duration: 8,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="mobile-reduce-blur absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
+            className="mobile-soft-blur absolute w-[280px] h-[280px] md:w-[600px] md:h-[600px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-10 right-10"
           />
 
-          <motion.div
-            animate={{
-              rotate: 360,
-            }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute w-[390px] h-[390px] md:w-[760px] md:h-[760px] rounded-full border border-white/10"
-          />
+          {!isMobile && (
+            <>
+              <motion.div
+                animate={{
+                  rotate: 360,
+                }}
+                transition={{
+                  duration: 18,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="absolute w-[760px] h-[760px] rounded-full border border-white/10"
+              />
 
-          <motion.div
-            animate={{
-              rotate: -360,
-            }}
-            transition={{
-              duration: 24,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute w-[280px] h-[280px] md:w-[560px] md:h-[560px] rounded-full border border-purple-400/20"
-          />
+              <motion.div
+                animate={{
+                  rotate: -360,
+                }}
+                transition={{
+                  duration: 24,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                className="absolute w-[560px] h-[560px] rounded-full border border-purple-400/20"
+              />
+            </>
+          )}
 
           {[...Array(splashParticles)].map((_, i) => (
             <motion.div
@@ -459,7 +497,7 @@ export default function App() {
                 delay: i * 0.12,
                 ease: "easeOut",
               }}
-              className="absolute w-1.5 h-1.5 md:w-2 md:h-2 bg-white/50 rounded-full"
+              className="absolute w-2 h-2 bg-white/50 rounded-full"
               style={{
                 left: `${5 + i * 3}%`,
                 bottom: "10%",
@@ -467,36 +505,37 @@ export default function App() {
             />
           ))}
 
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                opacity: [0, 1, 0],
-                scale: [0, 1.4, 0],
-                rotate: [0, 180, 360],
-                y: [0, -45, -85],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                delay: i * 0.45,
-                ease: "easeInOut",
-              }}
-              className="absolute text-yellow-300 drop-shadow-[0_0_16px_rgba(253,224,71,1)]"
-              style={{
-                left: `${15 + i * 17}%`,
-                top: `${20 + (i % 2) * 45}%`,
-              }}
-            >
-              <FaStar />
-            </motion.div>
-          ))}
+          {!isMobile &&
+            [...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  opacity: [0, 1, 0],
+                  scale: [0, 1.4, 0],
+                  rotate: [0, 180, 360],
+                  y: [0, -45, -85],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  delay: i * 0.45,
+                  ease: "easeInOut",
+                }}
+                className="absolute text-yellow-300 drop-shadow-[0_0_16px_rgba(253,224,71,1)]"
+                style={{
+                  left: `${15 + i * 17}%`,
+                  top: `${20 + (i % 2) * 45}%`,
+                }}
+              >
+                <FaStar />
+              </motion.div>
+            ))}
 
           <motion.div
             initial={{
               opacity: 0,
-              scale: 0.65,
-              y: 80,
+              scale: 0.78,
+              y: 60,
             }}
             animate={{
               opacity: 1,
@@ -504,49 +543,59 @@ export default function App() {
               y: 0,
             }}
             transition={{
-              duration: 0.9,
+              duration: isMobile ? 0.45 : 0.9,
               ease: "easeOut",
             }}
-            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-2xl rounded-[2rem] px-6 md:px-12 py-8 md:py-10 shadow-[0_0_100px_rgba(147,51,234,0.35)] w-full max-w-lg"
+            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-xl rounded-[2rem] px-6 md:px-12 py-8 md:py-10 shadow-[0_0_80px_rgba(147,51,234,0.28)] w-full max-w-lg"
           >
             <motion.div
-              animate={{
-                y: [0, -14, 0],
-                rotate: [0, 7, -7, 0],
-                scale: [1, 1.04, 1],
-              }}
+              animate={
+                isMobile
+                  ? {}
+                  : {
+                      y: [0, -14, 0],
+                      rotate: [0, 7, -7, 0],
+                      scale: [1, 1.04, 1],
+                    }
+              }
               transition={{
                 duration: 2.4,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="relative mx-auto mb-7 w-24 h-24 md:w-32 md:h-32 rounded-[2rem] bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-700 flex items-center justify-center shadow-[0_0_75px_rgba(59,130,246,0.9)]"
+              className="relative mx-auto mb-7 w-24 h-24 md:w-32 md:h-32 rounded-[2rem] bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-700 flex items-center justify-center shadow-[0_0_65px_rgba(59,130,246,0.75)]"
             >
               <FaBrain size={50} />
 
-              <motion.div
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.75, 0, 0.75],
-                }}
-                transition={{
-                  duration: 1.9,
-                  repeat: Infinity,
-                  ease: "easeOut",
-                }}
-                className="absolute inset-0 rounded-[2rem] border-4 border-cyan-300"
-              />
+              {!isMobile && (
+                <motion.div
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.75, 0, 0.75],
+                  }}
+                  transition={{
+                    duration: 1.9,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                  }}
+                  className="absolute inset-0 rounded-[2rem] border-4 border-cyan-300"
+                />
+              )}
             </motion.div>
 
             <div className="flex justify-center gap-5 text-yellow-300 mb-5 text-xl md:text-2xl">
               {[FaBookOpen, FaStar, FaRocket].map((Icon, i) => (
                 <motion.div
                   key={i}
-                  animate={{
-                    y: [0, -9, 0],
-                    rotate: [0, 14, -14, 0],
-                    scale: [1, 1.2, 1],
-                  }}
+                  animate={
+                    isMobile
+                      ? {}
+                      : {
+                          y: [0, -9, 0],
+                          rotate: [0, 14, -14, 0],
+                          scale: [1, 1.2, 1],
+                        }
+                  }
                   transition={{
                     duration: 1.5,
                     repeat: Infinity,
@@ -562,14 +611,14 @@ export default function App() {
             <motion.h1
               initial={{
                 opacity: 0,
-                y: 25,
+                y: 20,
               }}
               animate={{
                 opacity: 1,
                 y: 0,
               }}
               transition={{
-                delay: 0.25,
+                delay: 0.2,
               }}
               className="text-5xl md:text-7xl font-black bg-gradient-to-r from-cyan-300 via-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-glow"
             >
@@ -579,28 +628,21 @@ export default function App() {
             <motion.p
               initial={{
                 opacity: 0,
-                y: 15,
+                y: 12,
               }}
               animate={{
                 opacity: 1,
                 y: 0,
               }}
               transition={{
-                delay: 0.55,
+                delay: 0.4,
               }}
               className="text-slate-200 mt-4 text-lg"
             >
               Made by Mithun
             </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="text-slate-400 mt-2 text-sm"
-            >
-              Loading your AI tutor...
-            </motion.p>
+            <p className="text-slate-400 mt-2 text-sm">Loading your AI tutor...</p>
 
             <div className="flex justify-center gap-3 mt-7">
               <div className="w-3 h-3 bg-cyan-300 rounded-full animate-bounce" />
@@ -613,7 +655,7 @@ export default function App() {
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
                 transition={{
-                  duration: 2.3,
+                  duration: isMobile ? 1 : 2.2,
                   ease: "easeInOut",
                 }}
                 className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 via-purple-500 to-pink-500 rounded-full"
@@ -653,70 +695,84 @@ export default function App() {
     <MathJaxContext>
       <GlobalEffects />
 
-      <div className="app-height bg-black text-white overflow-hidden relative animated-grid">
-        <motion.div
-          animate={{
-            backgroundPosition: ["0px 0px", "100px 100px"],
-          }}
-          transition={{
-            duration: 9,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="absolute inset-0 animated-grid opacity-20"
-        />
+      <div className="app-height bg-black text-white overflow-hidden relative">
+        {!isMobile && (
+          <motion.div
+            animate={{
+              backgroundPosition: ["0px 0px", "100px 100px"],
+            }}
+            transition={{
+              duration: 9,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute inset-0 animated-grid opacity-20"
+          />
+        )}
 
         <motion.div
-          animate={{
-            x: [0, 50, -40, 0],
-            y: [0, -40, 30, 0],
-          }}
+          animate={
+            isMobile
+              ? {}
+              : {
+                  x: [0, 50, -40, 0],
+                  y: [0, -40, 30, 0],
+                }
+          }
           transition={{
             duration: 9,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="mobile-reduce-blur absolute w-[350px] h-[350px] md:w-[500px] md:h-[500px] bg-blue-600 opacity-20 blur-3xl rounded-full top-[-120px] left-[-120px]"
+          className="mobile-soft-blur absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-blue-600 opacity-20 blur-3xl rounded-full top-[-120px] left-[-120px]"
         />
 
         <motion.div
-          animate={{
-            x: [0, -45, 35, 0],
-            y: [0, 40, -30, 0],
-          }}
+          animate={
+            isMobile
+              ? {}
+              : {
+                  x: [0, -45, 35, 0],
+                  y: [0, 40, -30, 0],
+                }
+          }
           transition={{
             duration: 10,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="mobile-reduce-blur absolute w-[330px] h-[330px] md:w-[420px] md:h-[420px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-120px] right-[-120px]"
+          className="mobile-soft-blur absolute w-[300px] h-[300px] md:w-[420px] md:h-[420px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-120px] right-[-120px]"
         />
 
         <div className="relative z-10 flex flex-col app-height">
           <motion.div
             initial={{
               opacity: 0,
-              y: -30,
+              y: -25,
             }}
             animate={{
               opacity: 1,
               y: 0,
             }}
             transition={{
-              duration: 0.6,
+              duration: isMobile ? 0.25 : 0.6,
             }}
             className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 md:p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg"
           >
             <div className="flex items-center gap-3">
               <motion.div
-                whileHover={{
-                  rotate: 10,
-                  scale: 1.08,
-                }}
                 whileTap={{
                   scale: 0.92,
                 }}
-                className="bg-blue-600 p-3 md:p-4 rounded-2xl shadow-[0_0_25px_rgba(37,99,235,0.7)]"
+                whileHover={
+                  isMobile
+                    ? {}
+                    : {
+                        rotate: 10,
+                        scale: 1.08,
+                      }
+                }
+                className="bg-blue-600 p-3 md:p-4 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.55)]"
               >
                 <FaBrain size={24} />
               </motion.div>
@@ -732,27 +788,11 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap justify-center md:justify-end">
-              <motion.div
-                animate={{
-                  boxShadow: [
-                    "0 0 8px rgba(234,179,8,0.3)",
-                    "0 0 22px rgba(234,179,8,0.75)",
-                    "0 0 8px rgba(234,179,8,0.3)",
-                  ],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                }}
-                className="bg-yellow-500 text-black px-3 md:px-4 py-2 rounded-xl font-bold text-sm md:text-base"
-              >
+              <div className="bg-yellow-500 text-black px-3 md:px-4 py-2 rounded-xl font-bold text-sm md:text-base">
                 XP: {xp}
-              </motion.div>
+              </div>
 
               <motion.button
-                whileHover={{
-                  scale: 1.08,
-                }}
                 whileTap={{
                   scale: 0.92,
                 }}
@@ -763,9 +803,6 @@ export default function App() {
               </motion.button>
 
               <motion.button
-                whileHover={{
-                  scale: 1.06,
-                }}
                 whileTap={{
                   scale: 0.95,
                 }}
@@ -791,28 +828,27 @@ export default function App() {
                   <motion.button
                     key={mode.id}
                     onClick={() => setTutorStyle(mode.id)}
-                    whileHover={{
-                      scale: 1.05,
-                      y: -3,
-                    }}
                     whileTap={{
                       scale: 0.94,
                     }}
+                    whileHover={
+                      isMobile
+                        ? {}
+                        : {
+                            scale: 1.05,
+                            y: -3,
+                          }
+                    }
                     animate={
-                      selected
+                      selected && !isMobile
                         ? {
                             y: [0, -3, 0],
-                            boxShadow: [
-                              "0 0 0px rgba(255,255,255,0.2)",
-                              "0 0 22px rgba(255,255,255,0.3)",
-                              "0 0 0px rgba(255,255,255,0.2)",
-                            ],
                           }
                         : {}
                     }
                     transition={{
                       duration: 1.8,
-                      repeat: selected ? Infinity : 0,
+                      repeat: selected && !isMobile ? Infinity : 0,
                     }}
                     className={`min-w-[118px] md:min-w-[150px] p-3 md:p-4 rounded-2xl border relative overflow-hidden ${
                       selected
@@ -827,23 +863,9 @@ export default function App() {
                     />
 
                     <div className="relative z-10">
-                      <motion.div
-                        animate={
-                          selected
-                            ? {
-                                rotate: [0, 8, -8, 0],
-                                scale: [1, 1.12, 1],
-                              }
-                            : {}
-                        }
-                        transition={{
-                          duration: 1.5,
-                          repeat: selected ? Infinity : 0,
-                        }}
-                        className="text-xl md:text-2xl mb-1 md:mb-2"
-                      >
+                      <div className="text-xl md:text-2xl mb-1 md:mb-2">
                         {mode.icon}
-                      </motion.div>
+                      </div>
                       <p className="font-bold text-sm md:text-base">
                         {mode.name}
                       </p>
@@ -863,18 +885,18 @@ export default function App() {
                 key={i}
                 initial={{
                   opacity: 0,
-                  scale: 0.85,
+                  scale: 0.9,
                 }}
                 animate={{
                   opacity: 1,
                   scale: 1,
                 }}
                 transition={{
-                  delay: i * 0.1,
+                  delay: isMobile ? 0 : i * 0.08,
                 }}
                 className={`px-3 md:px-4 py-2 rounded-xl whitespace-nowrap text-xs md:text-base ${
                   a.unlocked
-                    ? "bg-green-500 shadow-[0_0_20px_rgba(34,197,94,0.5)]"
+                    ? "bg-green-500 shadow-[0_0_14px_rgba(34,197,94,0.4)]"
                     : "bg-slate-700"
                 }`}
               >
@@ -888,7 +910,7 @@ export default function App() {
               <motion.div
                 initial={{
                   opacity: 0,
-                  y: 30,
+                  y: 25,
                 }}
                 animate={{
                   opacity: 1,
@@ -896,18 +918,9 @@ export default function App() {
                 }}
                 className="text-center text-slate-400 mt-12 md:mt-20"
               >
-                <motion.h2
-                  animate={{
-                    scale: [1, 1.025, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
-                  className="text-2xl md:text-3xl font-bold mb-3 text-white"
-                >
+                <h2 className="text-2xl md:text-3xl font-bold mb-3 text-white">
                   Ask your first homework question
-                </motion.h2>
+                </h2>
                 <p className="text-sm md:text-base">
                   Type a question, use the mic, or upload homework.
                 </p>
@@ -922,8 +935,8 @@ export default function App() {
                 key={index}
                 initial={{
                   opacity: 0,
-                  y: 25,
-                  scale: 0.97,
+                  y: 20,
+                  scale: 0.98,
                 }}
                 animate={{
                   opacity: 1,
@@ -931,63 +944,49 @@ export default function App() {
                   scale: 1,
                 }}
                 transition={{
-                  duration: 0.35,
-                  type: "spring",
+                  duration: isMobile ? 0.15 : 0.35,
                 }}
                 className={`flex ${
                   msg.type === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <motion.div
+                <div
                   className={`max-w-[94%] md:max-w-[70%] rounded-3xl p-4 md:p-5 shadow-lg text-sm md:text-base ${
                     msg.type === "user"
-                      ? "bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.35)]"
-                      : "bg-white/10 backdrop-blur-lg border border-white/10"
+                      ? "bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                      : "bg-white/10 md:backdrop-blur-lg border border-white/10"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <motion.div
-                      animate={
-                        msg.type === "ai"
-                          ? {
-                              rotate: [0, 8, -8, 0],
-                            }
-                          : {}
-                      }
-                      transition={{
-                        duration: 2,
-                        repeat: msg.type === "ai" ? Infinity : 0,
-                      }}
-                    >
-                      {msg.type === "user" ? <FaUser /> : <FaBrain />}
-                    </motion.div>
+                    <div>{msg.type === "user" ? <FaUser /> : <FaBrain />}</div>
 
                     <span className="font-bold">
                       {msg.type === "user" ? "You" : "Homework AI"}
                     </span>
                   </div>
 
-                  <MathJax>
-                    {msg.type === "ai" ? (
-                      <div className="prose prose-invert max-w-none text-sm md:text-base">
-                        <Typewriter
-                          words={[msg.text]}
-                          loop={1}
-                          cursor={false}
-                          typeSpeed={8}
-                        />
-                      </div>
-                    ) : (
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
-                    )}
-                  </MathJax>
+                  {isMobile ? (
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  ) : (
+                    <MathJax>
+                      {msg.type === "ai" ? (
+                        <div className="prose prose-invert max-w-none text-sm md:text-base">
+                          <Typewriter
+                            words={[msg.text]}
+                            loop={1}
+                            cursor={false}
+                            typeSpeed={8}
+                          />
+                        </div>
+                      ) : (
+                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      )}
+                    </MathJax>
+                  )}
 
                   {msg.type === "ai" && (
                     <div className="flex gap-3 mt-4 flex-wrap">
                       <motion.button
-                        whileHover={{
-                          scale: 1.06,
-                        }}
                         whileTap={{
                           scale: 0.94,
                         }}
@@ -999,9 +998,6 @@ export default function App() {
                       </motion.button>
 
                       <motion.button
-                        whileHover={{
-                          scale: 1.06,
-                        }}
                         whileTap={{
                           scale: 0.94,
                         }}
@@ -1013,7 +1009,7 @@ export default function App() {
                       </motion.button>
                     </div>
                   )}
-                </motion.div>
+                </div>
               </motion.div>
             ))}
 
@@ -1021,7 +1017,7 @@ export default function App() {
               <motion.div
                 initial={{
                   opacity: 0,
-                  scale: 0.85,
+                  scale: 0.9,
                 }}
                 animate={{
                   opacity: 1,
@@ -1044,14 +1040,14 @@ export default function App() {
           <motion.div
             initial={{
               opacity: 0,
-              y: 35,
+              y: 25,
             }}
             animate={{
               opacity: 1,
               y: 0,
             }}
             transition={{
-              delay: 0.2,
+              delay: isMobile ? 0 : 0.2,
             }}
             className="p-3 md:p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg"
           >
@@ -1082,8 +1078,8 @@ export default function App() {
               <motion.div
                 initial={{
                   opacity: 0,
-                  scale: 0.92,
-                  y: 12,
+                  scale: 0.95,
+                  y: 10,
                 }}
                 animate={{
                   opacity: 1,
@@ -1129,7 +1125,7 @@ export default function App() {
                   scale: 0.9,
                 }}
                 animate={
-                  listening
+                  listening && !isMobile
                     ? {
                         scale: [1, 1.12, 1],
                         boxShadow: [
@@ -1142,7 +1138,7 @@ export default function App() {
                 }
                 transition={{
                   duration: 1,
-                  repeat: listening ? Infinity : 0,
+                  repeat: listening && !isMobile ? Infinity : 0,
                 }}
                 onClick={() =>
                   SpeechRecognition.startListening({
@@ -1163,7 +1159,7 @@ export default function App() {
                   scale: 0.9,
                 }}
                 animate={
-                  !loading
+                  !loading && !isMobile
                     ? {
                         boxShadow: [
                           "0 0 8px rgba(37,99,235,0.5)",
@@ -1175,7 +1171,7 @@ export default function App() {
                 }
                 transition={{
                   duration: 1.8,
-                  repeat: Infinity,
+                  repeat: !isMobile ? Infinity : 0,
                 }}
                 onClick={solveHomework}
                 disabled={loading}
