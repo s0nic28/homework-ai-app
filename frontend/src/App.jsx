@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+} from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
 import {
-  FaRobot,
+  FaBrain,
   FaUser,
   FaPaperPlane,
   FaVolumeUp,
   FaTrash,
   FaStop,
   FaCode,
-  FaBrain,
   FaSmile,
   FaChalkboardTeacher,
   FaGamepad,
@@ -20,6 +23,9 @@ import {
   FaBolt,
   FaBookOpen,
   FaStar,
+  FaRocket,
+  FaMagic,
+  FaGem,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -42,13 +48,25 @@ export default function App() {
   const [xp, setXp] = useState(0);
   const [image, setImage] = useState(null);
   const [tutorStyle, setTutorStyle] = useState("friendly");
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
 
   const [loggedIn, setLoggedIn] = useState(
     !!localStorage.getItem("homeworkUser")
   );
 
   const messagesEndRef = useRef(null);
+
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+
+  const smoothX = useSpring(cursorX, {
+    stiffness: 500,
+    damping: 40,
+  });
+
+  const smoothY = useSpring(cursorY, {
+    stiffness: 500,
+    damping: 40,
+  });
 
   const { transcript, listening, resetTranscript } =
     useSpeechRecognition();
@@ -106,17 +124,15 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 3300);
+    }, 3800);
 
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     const moveCursor = (e) => {
-      setCursorPos({
-        x: e.clientX,
-        y: e.clientY,
-      });
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
     };
 
     window.addEventListener("mousemove", moveCursor);
@@ -124,7 +140,7 @@ export default function App() {
     return () => {
       window.removeEventListener("mousemove", moveCursor);
     };
-  }, []);
+  }, [cursorX, cursorY]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -287,10 +303,6 @@ export default function App() {
     <>
       <style>
         {`
-          * {
-            cursor: none;
-          }
-
           *::-webkit-scrollbar {
             width: 0px;
             height: 0px;
@@ -307,43 +319,84 @@ export default function App() {
 
           .animated-grid {
             background-image:
-              linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-            background-size: 45px 45px;
+              linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+            background-size: 46px 46px;
+          }
+
+          .text-glow {
+            text-shadow:
+              0 0 20px rgba(96,165,250,0.8),
+              0 0 40px rgba(168,85,247,0.6),
+              0 0 80px rgba(236,72,153,0.4);
           }
         `}
       </style>
 
+      {/* Smooth cursor glow, no glitch */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-[9999] border border-blue-300/80 mix-blend-difference hidden md:block"
-        animate={{
-          x: cursorPos.x - 16,
-          y: cursorPos.y - 16,
-          scale: [1, 1.25, 1],
+        className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[9999] hidden md:block"
+        style={{
+          x: smoothX,
+          y: smoothY,
+          translateX: "-50%",
+          translateY: "-50%",
         }}
-        transition={{
-          x: { duration: 0.08 },
-          y: { duration: 0.08 },
-          scale: {
-            duration: 1.2,
+      >
+        <motion.div
+          animate={{
+            scale: [1, 1.35, 1],
+            opacity: [0.55, 0.2, 0.55],
+          }}
+          transition={{
+            duration: 1.5,
             repeat: Infinity,
             ease: "easeInOut",
-          },
-        }}
-      />
+          }}
+          className="w-full h-full rounded-full border border-blue-300/60 shadow-[0_0_30px_rgba(96,165,250,0.8)]"
+        />
+      </motion.div>
 
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 rounded-full pointer-events-none z-[9999] bg-blue-300 hidden md:block"
-        animate={{
-          x: cursorPos.x - 4,
-          y: cursorPos.y - 4,
-        }}
-        transition={{
-          x: { duration: 0.02 },
-          y: { duration: 0.02 },
+        className="fixed top-0 left-0 w-3 h-3 rounded-full pointer-events-none z-[9999] bg-cyan-300 hidden md:block shadow-[0_0_20px_rgba(103,232,249,1)]"
+        style={{
+          x: cursorX,
+          y: cursorY,
+          translateX: "-50%",
+          translateY: "-50%",
         }}
       />
     </>
+  );
+
+  const SplashStar = ({ delay, left, top, size = "text-xl" }) => (
+    <motion.div
+      initial={{
+        opacity: 0,
+        scale: 0,
+        rotate: 0,
+      }}
+      animate={{
+        opacity: [0, 1, 1, 0],
+        scale: [0, 1.4, 1, 0],
+        rotate: [0, 180, 360, 540],
+        y: [0, -40, -90],
+        x: [0, 20, -20],
+      }}
+      transition={{
+        duration: 3.5,
+        repeat: Infinity,
+        delay,
+        ease: "easeInOut",
+      }}
+      className={`absolute ${size} text-yellow-300 drop-shadow-[0_0_18px_rgba(253,224,71,1)]`}
+      style={{
+        left,
+        top,
+      }}
+    >
+      <FaStar />
+    </motion.div>
   );
 
   if (showSplash) {
@@ -354,107 +407,130 @@ export default function App() {
         <div className="min-h-screen bg-black text-white flex items-center justify-center overflow-hidden relative animated-grid">
           <motion.div
             animate={{
-              backgroundPosition: ["0px 0px", "120px 120px"],
+              backgroundPosition: ["0px 0px", "160px 160px"],
             }}
             transition={{
-              duration: 5,
+              duration: 6,
               repeat: Infinity,
               ease: "linear",
             }}
             className="absolute inset-0 animated-grid opacity-40"
           />
 
+          {/* Insane aurora background */}
           <motion.div
             animate={{
-              x: [0, 100, -80, 0],
-              y: [0, -80, 60, 0],
-              scale: [1, 1.25, 0.85, 1],
+              x: [0, 130, -90, 0],
+              y: [0, -100, 70, 0],
+              scale: [1, 1.35, 0.85, 1],
             }}
             transition={{
               duration: 7,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute w-[650px] h-[650px] bg-blue-600 opacity-30 blur-3xl rounded-full"
+            className="absolute w-[760px] h-[760px] bg-blue-600 opacity-30 blur-3xl rounded-full"
           />
 
           <motion.div
             animate={{
-              x: [0, -90, 70, 0],
-              y: [0, 70, -60, 0],
-              scale: [1, 0.8, 1.3, 1],
+              x: [0, -120, 90, 0],
+              y: [0, 90, -70, 0],
+              scale: [1, 0.75, 1.4, 1],
             }}
             transition={{
               duration: 8,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute w-[500px] h-[500px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
+            className="absolute w-[620px] h-[620px] bg-purple-600 opacity-25 blur-3xl rounded-full bottom-10 right-10"
           />
 
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 16,
-              repeat: Infinity,
-              ease: "linear",
+            animate={{
+              x: [0, 70, -80, 0],
+              y: [0, 80, -90, 0],
+              scale: [1, 1.2, 0.9, 1],
             }}
-            className="absolute w-[760px] h-[760px] border border-blue-500/20 rounded-full"
+            transition={{
+              duration: 9,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute w-[500px] h-[500px] bg-pink-500 opacity-20 blur-3xl rounded-full top-20 right-20"
           />
 
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{
-              duration: 24,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute w-[560px] h-[560px] border border-purple-500/25 rounded-full"
-          />
-
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{
-              duration: 11,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute w-[390px] h-[390px] border border-pink-500/20 rounded-full"
-          />
-
-          {[...Array(32)].map((_, i) => (
+          {/* Rotating energy rings */}
+          {[900, 720, 540, 360].map((size, i) => (
             <motion.div
-              key={i}
-              initial={{
-                opacity: 0,
-                y: 120,
-              }}
+              key={size}
               animate={{
-                opacity: [0, 1, 0],
-                y: [-20, -260],
-                x: [0, i % 2 === 0 ? 60 : -60],
-                scale: [0.7, 1.4, 0.4],
+                rotate: i % 2 === 0 ? 360 : -360,
+                scale: [1, 1.04, 1],
               }}
               transition={{
-                duration: 3 + (i % 6),
-                repeat: Infinity,
-                delay: i * 0.12,
-                ease: "easeOut",
+                rotate: {
+                  duration: 14 + i * 5,
+                  repeat: Infinity,
+                  ease: "linear",
+                },
+                scale: {
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
               }}
-              className="absolute w-2 h-2 bg-white/50 rounded-full"
+              className="absolute rounded-full border border-white/10"
               style={{
-                left: `${5 + i * 3}%`,
-                bottom: "15%",
+                width: size,
+                height: size,
               }}
             />
           ))}
 
+          {/* Better insane stars */}
+          <SplashStar delay={0.1} left="12%" top="22%" size="text-2xl" />
+          <SplashStar delay={0.5} left="80%" top="18%" size="text-xl" />
+          <SplashStar delay={0.9} left="18%" top="72%" size="text-xl" />
+          <SplashStar delay={1.3} left="74%" top="70%" size="text-3xl" />
+          <SplashStar delay={1.7} left="50%" top="14%" size="text-lg" />
+          <SplashStar delay={2.1} left="42%" top="80%" size="text-xl" />
+
+          {/* Particles */}
+          {[...Array(42)].map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{
+                opacity: 0,
+                y: 140,
+              }}
+              animate={{
+                opacity: [0, 1, 0],
+                y: [-20, -320],
+                x: [0, i % 2 === 0 ? 80 : -80],
+                scale: [0.7, 1.6, 0.3],
+              }}
+              transition={{
+                duration: 3 + (i % 7),
+                repeat: Infinity,
+                delay: i * 0.09,
+                ease: "easeOut",
+              }}
+              className="absolute w-2 h-2 bg-white/50 rounded-full"
+              style={{
+                left: `${4 + i * 2.25}%`,
+                bottom: "10%",
+              }}
+            />
+          ))}
+
+          {/* Main splash card */}
           <motion.div
             initial={{
               opacity: 0,
-              scale: 0.65,
-              y: 80,
-              rotateX: 25,
+              scale: 0.55,
+              y: 100,
+              rotateX: 35,
             }}
             animate={{
               opacity: 1,
@@ -466,46 +542,48 @@ export default function App() {
               duration: 1,
               ease: "easeOut",
             }}
-            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-2xl rounded-[2.5rem] px-14 py-12 shadow-[0_0_120px_rgba(59,130,246,0.35)]"
+            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-2xl rounded-[2.8rem] px-14 py-12 shadow-[0_0_150px_rgba(147,51,234,0.45)]"
           >
             <motion.div
               animate={{
-                y: [0, -16, 0],
-                rotate: [0, 6, -6, 0],
+                y: [0, -20, 0],
+                rotate: [0, 8, -8, 0],
+                scale: [1, 1.04, 1],
               }}
               transition={{
-                duration: 2.4,
+                duration: 2.5,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="relative mx-auto mb-8 w-32 h-32 rounded-[2rem] bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-[0_0_80px_rgba(147,51,234,0.9)]"
+              className="relative mx-auto mb-8 w-36 h-36 rounded-[2.3rem] bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-700 flex items-center justify-center shadow-[0_0_100px_rgba(59,130,246,1)]"
             >
-              <FaRobot size={60} />
+              <FaBrain size={68} />
 
               <motion.div
                 animate={{
-                  scale: [1, 1.45, 1],
-                  opacity: [0.75, 0, 0.75],
+                  scale: [1, 1.55, 1],
+                  opacity: [0.8, 0, 0.8],
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 1.8,
                   repeat: Infinity,
                   ease: "easeOut",
                 }}
-                className="absolute inset-0 rounded-[2rem] border-4 border-blue-300"
+                className="absolute inset-0 rounded-[2.3rem] border-4 border-cyan-300"
               />
 
               <motion.div
                 animate={{
-                  scale: [1, 1.9, 1],
+                  scale: [1, 2.1, 1],
                   opacity: [0.45, 0, 0.45],
+                  rotate: [0, 180, 360],
                 }}
                 transition={{
-                  duration: 2.6,
+                  duration: 2.8,
                   repeat: Infinity,
                   ease: "easeOut",
                 }}
-                className="absolute inset-0 rounded-[2rem] border-2 border-pink-300"
+                className="absolute inset-0 rounded-[2.3rem] border-2 border-pink-300"
               />
             </motion.div>
 
@@ -513,11 +591,26 @@ export default function App() {
               initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="flex justify-center gap-3 text-blue-300 mb-4"
+              className="flex justify-center gap-5 text-yellow-300 mb-5 text-2xl"
             >
-              <FaBolt />
-              <FaBookOpen />
-              <FaStar />
+              {[FaBolt, FaBookOpen, FaStar, FaRocket, FaGem].map((Icon, i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    y: [0, -10, 0],
+                    rotate: [0, 15, -15, 0],
+                    scale: [1, 1.25, 1],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    delay: i * 0.2,
+                  }}
+                  className="drop-shadow-[0_0_18px_rgba(253,224,71,1)]"
+                >
+                  <Icon />
+                </motion.div>
+              ))}
             </motion.div>
 
             <motion.h1
@@ -530,7 +623,7 @@ export default function App() {
                 y: 0,
               }}
               transition={{ delay: 0.35 }}
-              className="text-6xl md:text-7xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+              className="text-6xl md:text-8xl font-black bg-gradient-to-r from-cyan-300 via-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-glow"
             >
               Homework AI
             </motion.h1>
@@ -545,7 +638,7 @@ export default function App() {
                 y: 0,
               }}
               transition={{ delay: 0.65 }}
-              className="text-slate-300 mt-4 text-lg"
+              className="text-slate-200 mt-5 text-xl"
             >
               Made by Mithun
             </motion.p>
@@ -553,27 +646,27 @@ export default function App() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-              className="text-slate-500 mt-2 text-sm"
+              transition={{ delay: 0.95 }}
+              className="text-slate-400 mt-2 text-sm"
             >
-              Starting your step-by-step AI tutor engine...
+              Igniting your step-by-step AI tutor engine...
             </motion.p>
 
-            <div className="flex justify-center gap-2 mt-8">
-              <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
+            <div className="flex justify-center gap-3 mt-9">
+              <div className="w-3 h-3 bg-cyan-300 rounded-full animate-bounce" />
               <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
               <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-200" />
             </div>
 
-            <div className="mt-8 w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto">
+            <div className="mt-9 w-80 h-3 bg-white/10 rounded-full overflow-hidden mx-auto shadow-[0_0_30px_rgba(255,255,255,0.15)]">
               <motion.div
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
                 transition={{
-                  duration: 3,
+                  duration: 3.4,
                   ease: "easeInOut",
                 }}
-                className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
+                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 via-purple-500 to-pink-500 rounded-full"
               />
             </div>
           </motion.div>
@@ -675,7 +768,7 @@ export default function App() {
                 }}
                 className="bg-blue-600 p-4 rounded-2xl shadow-[0_0_30px_rgba(37,99,235,0.8)]"
               >
-                <FaRobot size={28} />
+                <FaBrain size={28} />
               </motion.div>
 
               <div>
@@ -954,7 +1047,7 @@ export default function App() {
                         repeat: msg.type === "ai" ? Infinity : 0,
                       }}
                     >
-                      {msg.type === "user" ? <FaUser /> : <FaRobot />}
+                      {msg.type === "user" ? <FaUser /> : <FaBrain />}
                     </motion.div>
 
                     <span className="font-bold">
@@ -1026,7 +1119,7 @@ export default function App() {
                 }}
                 className="flex items-center gap-3 bg-white/10 border border-white/10 rounded-2xl w-fit px-5 py-4"
               >
-                <FaRobot />
+                <FaBrain />
                 <div className="flex gap-2">
                   <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
                   <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
