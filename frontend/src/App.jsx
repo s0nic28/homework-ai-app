@@ -204,7 +204,7 @@ export default function App() {
 
       const res =
         await axios.post(
-          "http://localhost:5000/ai/solve",
+          "https://homework-ai-app-jgsw.onrender.com",
           formData
         );
 
