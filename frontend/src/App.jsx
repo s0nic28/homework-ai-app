@@ -24,7 +24,7 @@ import { MathJax, MathJaxContext } from "better-react-mathjax";
 import { useDropzone } from "react-dropzone";
 
 // CHANGE THIS TO YOUR REAL RENDER BACKEND URL
-const API_URL = "https://homework-ai-app-jgsw.onrender.com";
+const API_URL = "https://homework-ai-app-jgsw.onrender.com/ai/solve";
 
 export default function App() {
   const [question, setQuestion] = useState("");
