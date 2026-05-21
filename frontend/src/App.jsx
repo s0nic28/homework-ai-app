@@ -821,12 +821,35 @@ export default function App() {
             </p>
 
             <div className="flex gap-3 md:gap-4 overflow-x-auto pb-1">
-              {tutorModes.map((mode) => {
+              {tutorModes.map((mode, index) => {
                 const selected = tutorStyle === mode.id;
 
                 return (
                   <motion.button
                     key={mode.id}
+                    initial={{
+                      opacity: 0,
+                      y: 20,
+                      scale: 0.9,
+                    }}
+                    animate={
+                      selected && !isMobile
+                        ? {
+                            opacity: 1,
+                            y: [0, -3, 0],
+                            scale: 1,
+                          }
+                        : {
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                          }
+                    }
+                    transition={{
+                      duration: isMobile ? 0.15 : 1.8,
+                      repeat: selected && !isMobile ? Infinity : 0,
+                      delay: isMobile ? 0 : index * 0.08,
+                    }}
                     onClick={() => setTutorStyle(mode.id)}
                     whileTap={{
                       scale: 0.94,
@@ -839,17 +862,6 @@ export default function App() {
                             y: -3,
                           }
                     }
-                    animate={
-                      selected && !isMobile
-                        ? {
-                            y: [0, -3, 0],
-                          }
-                        : {}
-                    }
-                    transition={{
-                      duration: 1.8,
-                      repeat: selected && !isMobile ? Infinity : 0,
-                    }}
                     className={`min-w-[118px] md:min-w-[150px] p-3 md:p-4 rounded-2xl border relative overflow-hidden ${
                       selected
                         ? "border-white/40 bg-white/15"
@@ -935,16 +947,20 @@ export default function App() {
                 key={index}
                 initial={{
                   opacity: 0,
-                  y: 20,
-                  scale: 0.98,
+                  y: isMobile ? 12 : 28,
+                  scale: 0.96,
+                  rotateX: isMobile ? 0 : 8,
                 }}
                 animate={{
                   opacity: 1,
                   y: 0,
                   scale: 1,
+                  rotateX: 0,
                 }}
                 transition={{
-                  duration: isMobile ? 0.15 : 0.35,
+                  duration: isMobile ? 0.18 : 0.45,
+                  type: "spring",
+                  stiffness: 160,
                 }}
                 className={`flex ${
                   msg.type === "user" ? "justify-end" : "justify-start"
@@ -954,7 +970,7 @@ export default function App() {
                   className={`max-w-[94%] md:max-w-[70%] rounded-3xl p-4 md:p-5 shadow-lg text-sm md:text-base ${
                     msg.type === "user"
                       ? "bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
-                      : "bg-white/10 md:backdrop-blur-lg border border-white/10"
+                      : "bg-white/10 md:backdrop-blur-lg border border-white/10 shadow-[0_0_25px_rgba(147,197,253,0.12)]"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -990,6 +1006,14 @@ export default function App() {
                         whileTap={{
                           scale: 0.94,
                         }}
+                        whileHover={
+                          isMobile
+                            ? {}
+                            : {
+                                scale: 1.06,
+                                y: -2,
+                              }
+                        }
                         onClick={() => speakText(msg.text)}
                         className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
                       >
@@ -1001,6 +1025,14 @@ export default function App() {
                         whileTap={{
                           scale: 0.94,
                         }}
+                        whileHover={
+                          isMobile
+                            ? {}
+                            : {
+                                scale: 1.06,
+                                y: -2,
+                              }
+                        }
                         onClick={stopSpeaking}
                         className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
                       >
@@ -1018,14 +1050,34 @@ export default function App() {
                 initial={{
                   opacity: 0,
                   scale: 0.9,
+                  y: 10,
                 }}
                 animate={{
                   opacity: 1,
                   scale: 1,
+                  y: 0,
                 }}
                 className="flex items-center gap-3 bg-white/10 border border-white/10 rounded-2xl w-fit px-5 py-4"
               >
-                <FaBrain />
+                <motion.div
+                  animate={
+                    isMobile
+                      ? {}
+                      : {
+                          rotate: [0, 10, -10, 0],
+                          scale: [1, 1.15, 1],
+                        }
+                  }
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                  }}
+                >
+                  <FaBrain />
+                </motion.div>
+
+                <span className="text-sm text-slate-300">Thinking</span>
+
                 <div className="flex gap-2">
                   <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" />
                   <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce delay-100" />
@@ -1158,12 +1210,22 @@ export default function App() {
                 whileTap={{
                   scale: 0.9,
                 }}
+                whileHover={
+                  isMobile
+                    ? {}
+                    : {
+                        scale: 1.08,
+                        rotate: -3,
+                      }
+                }
                 animate={
                   !loading && !isMobile
                     ? {
+                        scale: [1, 1.04, 1],
+                        rotate: [0, -3, 3, 0],
                         boxShadow: [
                           "0 0 8px rgba(37,99,235,0.5)",
-                          "0 0 25px rgba(37,99,235,0.85)",
+                          "0 0 30px rgba(37,99,235,0.95)",
                           "0 0 8px rgba(37,99,235,0.5)",
                         ],
                       }
