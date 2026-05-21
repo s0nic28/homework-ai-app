@@ -19,6 +19,8 @@ import {
   FaStar,
   FaRocket,
   FaBookOpen,
+  FaMagic,
+  FaBolt,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -34,7 +36,10 @@ import { useDropzone } from "react-dropzone";
 const API_URL = "https://homework-ai-app-jgsw.onrender.com/ai/solve";
 
 export default function App() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" && window.innerWidth < 768
+  );
+
   const [showSplash, setShowSplash] = useState(true);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
@@ -53,13 +58,13 @@ export default function App() {
   const cursorY = useMotionValue(-100);
 
   const smoothX = useSpring(cursorX, {
-    stiffness: 400,
-    damping: 35,
+    stiffness: 420,
+    damping: 38,
   });
 
   const smoothY = useSpring(cursorY, {
-    stiffness: 400,
-    damping: 35,
+    stiffness: 420,
+    damping: 38,
   });
 
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
@@ -69,14 +74,14 @@ export default function App() {
       id: "friendly",
       name: "Friendly",
       icon: <FaSmile />,
-      gradient: "from-blue-500 to-cyan-400",
+      gradient: "from-cyan-400 to-blue-600",
       desc: "Chill helper",
     },
     {
       id: "strict",
       name: "Strict",
       icon: <FaChalkboardTeacher />,
-      gradient: "from-red-500 to-orange-400",
+      gradient: "from-red-500 to-orange-500",
       desc: "Teacher mode",
     },
     {
@@ -88,9 +93,9 @@ export default function App() {
     },
     {
       id: "exam",
-      name: "Exam Coach",
+      name: "Exam",
       icon: <FaGraduationCap />,
-      gradient: "from-yellow-400 to-orange-500",
+      gradient: "from-yellow-300 to-orange-500",
       desc: "Exam focus",
     },
     {
@@ -122,15 +127,13 @@ export default function App() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-    };
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, isMobile ? 1200 : 2600);
+    }, isMobile ? 1200 : 2800);
 
     return () => clearTimeout(timer);
   }, [isMobile]);
@@ -145,9 +148,7 @@ export default function App() {
 
     window.addEventListener("mousemove", moveCursor);
 
-    return () => {
-      window.removeEventListener("mousemove", moveCursor);
-    };
+    return () => window.removeEventListener("mousemove", moveCursor);
   }, [cursorX, cursorY, isMobile]);
 
   useEffect(() => {
@@ -158,7 +159,6 @@ export default function App() {
 
   useEffect(() => {
     const user = localStorage.getItem("homeworkUser");
-
     if (!user) return;
 
     const savedMessages = localStorage.getItem(`chatHistory_${user}`);
@@ -172,7 +172,6 @@ export default function App() {
 
   useEffect(() => {
     const user = localStorage.getItem("homeworkUser");
-
     if (!user) return;
 
     localStorage.setItem(`chatHistory_${user}`, JSON.stringify(messages));
@@ -229,13 +228,15 @@ export default function App() {
     setMessages((prev) => [...prev, userMessage]);
 
     if (isCreatorQuestion) {
-      const aiMessage = {
-        type: "ai",
-        text:
-          "# Creator\n\nI was created by **Mithun**.\n\nThis app was built by **Mithun** to help students learn homework step-by-step.",
-      };
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "ai",
+          text:
+            "# Creator\n\nI was created by **Mithun**.\n\nThis app was built by **Mithun** to help students learn homework step-by-step.",
+        },
+      ]);
 
-      setMessages((prev) => [...prev, aiMessage]);
       setXp((prev) => prev + 5);
       setQuestion("");
       setImage(null);
@@ -257,12 +258,14 @@ export default function App() {
 
       const res = await axios.post(API_URL, formData);
 
-      const aiMessage = {
-        type: "ai",
-        text: res.data.answer || "No answer received.",
-      };
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "ai",
+          text: res.data.answer || "No answer received.",
+        },
+      ]);
 
-      setMessages((prev) => [...prev, aiMessage]);
       setXp((prev) => prev + 10);
     } catch (err) {
       console.log(err);
@@ -326,15 +329,16 @@ export default function App() {
 
           .animated-grid {
             background-image:
-              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 44px 44px;
+              linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 46px 46px;
           }
 
           .text-glow {
             text-shadow:
-              0 0 14px rgba(96,165,250,0.65),
-              0 0 24px rgba(168,85,247,0.35);
+              0 0 18px rgba(103,232,249,0.75),
+              0 0 34px rgba(168,85,247,0.55),
+              0 0 60px rgba(236,72,153,0.35);
           }
 
           @media (max-width: 768px) {
@@ -342,12 +346,12 @@ export default function App() {
               display: none;
             }
 
-            .mobile-hide {
+            .desktop-only {
               display: none;
             }
 
             .mobile-soft-blur {
-              filter: blur(35px);
+              filter: blur(32px);
             }
           }
         `}
@@ -374,12 +378,12 @@ export default function App() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="w-full h-full rounded-full border border-blue-300/60 shadow-[0_0_25px_rgba(96,165,250,0.8)]"
+              className="w-full h-full rounded-full border border-cyan-300/70 shadow-[0_0_30px_rgba(103,232,249,0.9)]"
             />
           </motion.div>
 
           <motion.div
-            className="custom-cursor fixed top-0 left-0 w-2.5 h-2.5 rounded-full pointer-events-none z-[9999] bg-cyan-300 shadow-[0_0_16px_rgba(103,232,249,1)]"
+            className="custom-cursor fixed top-0 left-0 w-2.5 h-2.5 rounded-full pointer-events-none z-[9999] bg-cyan-300 shadow-[0_0_20px_rgba(103,232,249,1)]"
             style={{
               x: cursorX,
               y: cursorY,
@@ -392,149 +396,121 @@ export default function App() {
     </>
   );
 
-  if (showSplash) {
-    const splashParticles = isMobile ? 0 : 24;
+  const AnimatedBackground = () => (
+    <>
+      {!isMobile && (
+        <motion.div
+          animate={{
+            backgroundPosition: ["0px 0px", "140px 140px"],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          className="absolute inset-0 animated-grid opacity-25"
+        />
+      )}
 
+      <motion.div
+        animate={
+          isMobile
+            ? {}
+            : {
+                x: [0, 80, -50, 0],
+                y: [0, -70, 40, 0],
+                scale: [1, 1.25, 0.9, 1],
+              }
+        }
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="mobile-soft-blur absolute w-[310px] h-[310px] md:w-[620px] md:h-[620px] bg-cyan-500 opacity-20 blur-3xl rounded-full top-[-120px] left-[-120px]"
+      />
+
+      <motion.div
+        animate={
+          isMobile
+            ? {}
+            : {
+                x: [0, -70, 60, 0],
+                y: [0, 60, -50, 0],
+                scale: [1, 0.85, 1.2, 1],
+              }
+        }
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="mobile-soft-blur absolute w-[300px] h-[300px] md:w-[520px] md:h-[520px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-120px] right-[-120px]"
+      />
+
+      {!isMobile && (
+        <>
+          <motion.div
+            animate={{
+              rotate: 360,
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute top-1/2 left-1/2 w-[900px] h-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-400/10"
+          />
+
+          <motion.div
+            animate={{
+              rotate: -360,
+            }}
+            transition={{
+              duration: 34,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute top-1/2 left-1/2 w-[650px] h-[650px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-purple-400/10"
+          />
+
+          {[...Array(16)].map((_, i) => (
+            <motion.div
+              key={i}
+              animate={{
+                opacity: [0, 1, 0],
+                y: [40, -160],
+                scale: [0.4, 1.2, 0.3],
+              }}
+              transition={{
+                duration: 4 + (i % 5),
+                repeat: Infinity,
+                delay: i * 0.25,
+              }}
+              className="absolute w-1.5 h-1.5 bg-white/60 rounded-full"
+              style={{
+                left: `${5 + i * 6}%`,
+                bottom: "10%",
+              }}
+            />
+          ))}
+        </>
+      )}
+    </>
+  );
+
+  if (showSplash) {
     return (
       <>
         <GlobalEffects />
 
         <div className="app-height bg-black text-white flex items-center justify-center overflow-hidden relative px-4">
-          {!isMobile && (
-            <motion.div
-              animate={{
-                backgroundPosition: ["0px 0px", "120px 120px"],
-              }}
-              transition={{
-                duration: 8,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="absolute inset-0 animated-grid opacity-30"
-            />
-          )}
-
-          <motion.div
-            animate={
-              isMobile
-                ? {}
-                : {
-                    x: [0, 80, -60, 0],
-                    y: [0, -70, 40, 0],
-                    scale: [1, 1.25, 0.9, 1],
-                  }
-            }
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="mobile-soft-blur absolute w-[320px] h-[320px] md:w-[760px] md:h-[760px] bg-blue-600 opacity-25 blur-3xl rounded-full"
-          />
-
-          <motion.div
-            animate={
-              isMobile
-                ? {}
-                : {
-                    x: [0, -70, 60, 0],
-                    y: [0, 70, -50, 0],
-                    scale: [1, 0.8, 1.25, 1],
-                  }
-            }
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="mobile-soft-blur absolute w-[280px] h-[280px] md:w-[600px] md:h-[600px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-10 right-10"
-          />
-
-          {!isMobile && (
-            <>
-              <motion.div
-                animate={{
-                  rotate: 360,
-                }}
-                transition={{
-                  duration: 18,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="absolute w-[760px] h-[760px] rounded-full border border-white/10"
-              />
-
-              <motion.div
-                animate={{
-                  rotate: -360,
-                }}
-                transition={{
-                  duration: 24,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="absolute w-[560px] h-[560px] rounded-full border border-purple-400/20"
-              />
-            </>
-          )}
-
-          {[...Array(splashParticles)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{
-                opacity: 0,
-                y: 120,
-              }}
-              animate={{
-                opacity: [0, 1, 0],
-                y: [-20, -260],
-                x: [0, i % 2 === 0 ? 50 : -50],
-                scale: [0.7, 1.4, 0.4],
-              }}
-              transition={{
-                duration: 3 + (i % 5),
-                repeat: Infinity,
-                delay: i * 0.12,
-                ease: "easeOut",
-              }}
-              className="absolute w-2 h-2 bg-white/50 rounded-full"
-              style={{
-                left: `${5 + i * 3}%`,
-                bottom: "10%",
-              }}
-            />
-          ))}
-
-          {!isMobile &&
-            [...Array(5)].map((_, i) => (
-              <motion.div
-                key={i}
-                animate={{
-                  opacity: [0, 1, 0],
-                  scale: [0, 1.4, 0],
-                  rotate: [0, 180, 360],
-                  y: [0, -45, -85],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  delay: i * 0.45,
-                  ease: "easeInOut",
-                }}
-                className="absolute text-yellow-300 drop-shadow-[0_0_16px_rgba(253,224,71,1)]"
-                style={{
-                  left: `${15 + i * 17}%`,
-                  top: `${20 + (i % 2) * 45}%`,
-                }}
-              >
-                <FaStar />
-              </motion.div>
-            ))}
+          <AnimatedBackground />
 
           <motion.div
             initial={{
               opacity: 0,
-              scale: 0.78,
+              scale: 0.75,
               y: 60,
             }}
             animate={{
@@ -546,8 +522,22 @@ export default function App() {
               duration: isMobile ? 0.45 : 0.9,
               ease: "easeOut",
             }}
-            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-xl rounded-[2rem] px-6 md:px-12 py-8 md:py-10 shadow-[0_0_80px_rgba(147,51,234,0.28)] w-full max-w-lg"
+            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-xl rounded-[2rem] px-6 md:px-12 py-8 md:py-10 shadow-[0_0_90px_rgba(147,51,234,0.32)] w-full max-w-lg overflow-hidden"
           >
+            {!isMobile && (
+              <motion.div
+                animate={{
+                  x: ["-120%", "120%"],
+                }}
+                transition={{
+                  duration: 2.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-12"
+              />
+            )}
+
             <motion.div
               animate={
                 isMobile
@@ -563,28 +553,41 @@ export default function App() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="relative mx-auto mb-7 w-24 h-24 md:w-32 md:h-32 rounded-[2rem] bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-700 flex items-center justify-center shadow-[0_0_65px_rgba(59,130,246,0.75)]"
+              className="relative mx-auto mb-7 w-24 h-24 md:w-32 md:h-32 rounded-[2rem] bg-gradient-to-br from-cyan-400 via-blue-600 to-purple-700 flex items-center justify-center shadow-[0_0_70px_rgba(59,130,246,0.8)]"
             >
               <FaBrain size={50} />
 
               {!isMobile && (
-                <motion.div
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.75, 0, 0.75],
-                  }}
-                  transition={{
-                    duration: 1.9,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                  }}
-                  className="absolute inset-0 rounded-[2rem] border-4 border-cyan-300"
-                />
+                <>
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.55, 1],
+                      opacity: [0.7, 0, 0.7],
+                    }}
+                    transition={{
+                      duration: 1.9,
+                      repeat: Infinity,
+                    }}
+                    className="absolute inset-0 rounded-[2rem] border-4 border-cyan-300"
+                  />
+
+                  <motion.div
+                    animate={{
+                      scale: [1, 2.1, 1],
+                      opacity: [0.35, 0, 0.35],
+                    }}
+                    transition={{
+                      duration: 2.6,
+                      repeat: Infinity,
+                    }}
+                    className="absolute inset-0 rounded-[2rem] border-2 border-pink-300"
+                  />
+                </>
               )}
             </motion.div>
 
             <div className="flex justify-center gap-5 text-yellow-300 mb-5 text-xl md:text-2xl">
-              {[FaBookOpen, FaStar, FaRocket].map((Icon, i) => (
+              {[FaBookOpen, FaStar, FaRocket, FaMagic].map((Icon, i) => (
                 <motion.div
                   key={i}
                   animate={
@@ -642,7 +645,9 @@ export default function App() {
               Made by Mithun
             </motion.p>
 
-            <p className="text-slate-400 mt-2 text-sm">Loading your AI tutor...</p>
+            <p className="text-slate-400 mt-2 text-sm">
+              Loading your AI tutor...
+            </p>
 
             <div className="flex justify-center gap-3 mt-7">
               <div className="w-3 h-3 bg-cyan-300 rounded-full animate-bounce" />
@@ -656,7 +661,6 @@ export default function App() {
                 animate={{ width: "100%" }}
                 transition={{
                   duration: isMobile ? 1 : 2.2,
-                  ease: "easeInOut",
                 }}
                 className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 via-purple-500 to-pink-500 rounded-full"
               />
@@ -696,53 +700,7 @@ export default function App() {
       <GlobalEffects />
 
       <div className="app-height bg-black text-white overflow-hidden relative">
-        {!isMobile && (
-          <motion.div
-            animate={{
-              backgroundPosition: ["0px 0px", "100px 100px"],
-            }}
-            transition={{
-              duration: 9,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            className="absolute inset-0 animated-grid opacity-20"
-          />
-        )}
-
-        <motion.div
-          animate={
-            isMobile
-              ? {}
-              : {
-                  x: [0, 50, -40, 0],
-                  y: [0, -40, 30, 0],
-                }
-          }
-          transition={{
-            duration: 9,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="mobile-soft-blur absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-blue-600 opacity-20 blur-3xl rounded-full top-[-120px] left-[-120px]"
-        />
-
-        <motion.div
-          animate={
-            isMobile
-              ? {}
-              : {
-                  x: [0, -45, 35, 0],
-                  y: [0, 40, -30, 0],
-                }
-          }
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="mobile-soft-blur absolute w-[300px] h-[300px] md:w-[420px] md:h-[420px] bg-purple-600 opacity-20 blur-3xl rounded-full bottom-[-120px] right-[-120px]"
-        />
+        <AnimatedBackground />
 
         <div className="relative z-10 flex flex-col app-height">
           <motion.div
@@ -772,7 +730,7 @@ export default function App() {
                         scale: 1.08,
                       }
                 }
-                className="bg-blue-600 p-3 md:p-4 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.55)]"
+                className="bg-gradient-to-br from-cyan-500 to-blue-700 p-3 md:p-4 rounded-2xl shadow-[0_0_25px_rgba(37,99,235,0.6)]"
               >
                 <FaBrain size={24} />
               </motion.div>
@@ -796,6 +754,14 @@ export default function App() {
                 whileTap={{
                   scale: 0.92,
                 }}
+                whileHover={
+                  isMobile
+                    ? {}
+                    : {
+                        scale: 1.08,
+                        rotate: 4,
+                      }
+                }
                 onClick={clearChat}
                 className="bg-red-500 hover:bg-red-600 p-3 rounded-xl"
               >
@@ -806,6 +772,14 @@ export default function App() {
                 whileTap={{
                   scale: 0.95,
                 }}
+                whileHover={
+                  isMobile
+                    ? {}
+                    : {
+                        scale: 1.05,
+                        y: -2,
+                      }
+                }
                 onClick={logout}
                 className="bg-slate-700 hover:bg-slate-600 px-3 md:px-4 py-3 rounded-xl font-bold text-sm"
               >
@@ -874,6 +848,13 @@ export default function App() {
                       } ${selected ? "opacity-30" : "opacity-10"}`}
                     />
 
+                    {selected && !isMobile && (
+                      <motion.div
+                        layoutId="activeMode"
+                        className="absolute inset-0 rounded-2xl border border-white/40 shadow-[0_0_25px_rgba(103,232,249,0.3)]"
+                      />
+                    )}
+
                     <div className="relative z-10">
                       <div className="text-xl md:text-2xl mb-1 md:mb-2">
                         {mode.icon}
@@ -930,9 +911,22 @@ export default function App() {
                 }}
                 className="text-center text-slate-400 mt-12 md:mt-20"
               >
-                <h2 className="text-2xl md:text-3xl font-bold mb-3 text-white">
+                <motion.h2
+                  animate={
+                    isMobile
+                      ? {}
+                      : {
+                          scale: [1, 1.025, 1],
+                        }
+                  }
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                  className="text-2xl md:text-3xl font-bold mb-3 text-white"
+                >
                   Ask your first homework question
-                </h2>
+                </motion.h2>
                 <p className="text-sm md:text-base">
                   Type a question, use the mic, or upload homework.
                 </p>
@@ -967,80 +961,98 @@ export default function App() {
                 }`}
               >
                 <div
-                  className={`max-w-[94%] md:max-w-[70%] rounded-3xl p-4 md:p-5 shadow-lg text-sm md:text-base ${
+                  className={`max-w-[94%] md:max-w-[70%] rounded-3xl p-4 md:p-5 shadow-lg text-sm md:text-base relative overflow-hidden ${
                     msg.type === "user"
-                      ? "bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                      ? "bg-blue-600 shadow-[0_0_18px_rgba(37,99,235,0.35)]"
                       : "bg-white/10 md:backdrop-blur-lg border border-white/10 shadow-[0_0_25px_rgba(147,197,253,0.12)]"
                   }`}
                 >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div>{msg.type === "user" ? <FaUser /> : <FaBrain />}</div>
-
-                    <span className="font-bold">
-                      {msg.type === "user" ? "You" : "Homework AI"}
-                    </span>
-                  </div>
-
-                  {isMobile ? (
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
-                  ) : (
-                    <MathJax>
-                      {msg.type === "ai" ? (
-                        <div className="prose prose-invert max-w-none text-sm md:text-base">
-                          <Typewriter
-                            words={[msg.text]}
-                            loop={1}
-                            cursor={false}
-                            typeSpeed={8}
-                          />
-                        </div>
-                      ) : (
-                        <ReactMarkdown>{msg.text}</ReactMarkdown>
-                      )}
-                    </MathJax>
+                  {!isMobile && msg.type === "ai" && (
+                    <motion.div
+                      animate={{
+                        x: ["-130%", "130%"],
+                      }}
+                      transition={{
+                        duration: 3.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
+                    />
                   )}
 
-                  {msg.type === "ai" && (
-                    <div className="flex gap-3 mt-4 flex-wrap">
-                      <motion.button
-                        whileTap={{
-                          scale: 0.94,
-                        }}
-                        whileHover={
-                          isMobile
-                            ? {}
-                            : {
-                                scale: 1.06,
-                                y: -2,
-                              }
-                        }
-                        onClick={() => speakText(msg.text)}
-                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
-                      >
-                        <FaVolumeUp />
-                        Speak
-                      </motion.button>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div>
+                        {msg.type === "user" ? <FaUser /> : <FaBrain />}
+                      </div>
 
-                      <motion.button
-                        whileTap={{
-                          scale: 0.94,
-                        }}
-                        whileHover={
-                          isMobile
-                            ? {}
-                            : {
-                                scale: 1.06,
-                                y: -2,
-                              }
-                        }
-                        onClick={stopSpeaking}
-                        className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
-                      >
-                        <FaStop />
-                        Stop
-                      </motion.button>
+                      <span className="font-bold">
+                        {msg.type === "user" ? "You" : "Homework AI"}
+                      </span>
                     </div>
-                  )}
+
+                    {isMobile ? (
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    ) : (
+                      <MathJax>
+                        {msg.type === "ai" ? (
+                          <div className="prose prose-invert max-w-none text-sm md:text-base">
+                            <Typewriter
+                              words={[msg.text]}
+                              loop={1}
+                              cursor={false}
+                              typeSpeed={8}
+                            />
+                          </div>
+                        ) : (
+                          <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        )}
+                      </MathJax>
+                    )}
+
+                    {msg.type === "ai" && (
+                      <div className="flex gap-3 mt-4 flex-wrap">
+                        <motion.button
+                          whileTap={{
+                            scale: 0.94,
+                          }}
+                          whileHover={
+                            isMobile
+                              ? {}
+                              : {
+                                  scale: 1.06,
+                                  y: -2,
+                                }
+                          }
+                          onClick={() => speakText(msg.text)}
+                          className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
+                        >
+                          <FaVolumeUp />
+                          Speak
+                        </motion.button>
+
+                        <motion.button
+                          whileTap={{
+                            scale: 0.94,
+                          }}
+                          whileHover={
+                            isMobile
+                              ? {}
+                              : {
+                                  scale: 1.06,
+                                  y: -2,
+                                }
+                          }
+                          onClick={stopSpeaking}
+                          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
+                        >
+                          <FaStop />
+                          Stop
+                        </motion.button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}
