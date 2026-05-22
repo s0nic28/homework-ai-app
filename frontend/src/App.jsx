@@ -20,6 +20,8 @@ import {
   FaRocket,
   FaBookOpen,
   FaMagic,
+  FaHeart,
+  FaSparkles,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -123,6 +125,20 @@ export default function App() {
     return localStorage.getItem("homeworkUser") || "guest";
   };
 
+  const loadFromLocalStorage = () => {
+    const user = localStorage.getItem("homeworkUser");
+
+    if (!user) return;
+
+    const savedMessages = localStorage.getItem(`chatHistory_${user}`);
+    const savedXP = localStorage.getItem(`xp_${user}`);
+    const savedMode = localStorage.getItem(`mode_${user}`);
+
+    if (savedMessages) setMessages(JSON.parse(savedMessages));
+    if (savedXP) setXp(Number(savedXP));
+    if (savedMode) setTutorStyle(savedMode);
+  };
+
   const loadFromSupabase = async () => {
     try {
       const username = getUserId();
@@ -172,20 +188,6 @@ export default function App() {
     }
   };
 
-  const loadFromLocalStorage = () => {
-    const user = localStorage.getItem("homeworkUser");
-
-    if (!user) return;
-
-    const savedMessages = localStorage.getItem(`chatHistory_${user}`);
-    const savedXP = localStorage.getItem(`xp_${user}`);
-    const savedMode = localStorage.getItem(`mode_${user}`);
-
-    if (savedMessages) setMessages(JSON.parse(savedMessages));
-    if (savedXP) setXp(Number(savedXP));
-    if (savedMode) setTutorStyle(savedMode);
-  };
-
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -200,7 +202,7 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, isMobile ? 1200 : 2800);
+    }, isMobile ? 1700 : 3300);
 
     return () => clearTimeout(timer);
   }, [isMobile]);
@@ -714,7 +716,103 @@ export default function App() {
               Made by Mithun
             </motion.p>
 
-            <p className="text-slate-400 mt-2 text-sm">
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.8,
+                y: 18,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              transition={{
+                delay: 0.65,
+                duration: 0.7,
+                type: "spring",
+              }}
+              className="mt-4 relative"
+            >
+              <motion.div
+                animate={
+                  isMobile
+                    ? {}
+                    : {
+                        scale: [1, 1.04, 1],
+                        boxShadow: [
+                          "0 0 15px rgba(236,72,153,0.25)",
+                          "0 0 35px rgba(103,232,249,0.35)",
+                          "0 0 15px rgba(236,72,153,0.25)",
+                        ],
+                      }
+                }
+                transition={{
+                  duration: 2.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="mx-auto w-fit px-4 py-3 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-xl"
+              >
+                <div className="flex items-center justify-center gap-2 text-pink-300 text-sm md:text-base font-semibold">
+                  <motion.span
+                    animate={
+                      isMobile
+                        ? {}
+                        : {
+                            rotate: [0, 12, -12, 0],
+                            scale: [1, 1.25, 1],
+                          }
+                    }
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                    }}
+                  >
+                    <FaHeart />
+                  </motion.span>
+
+                  <span>Special thanks to</span>
+
+                  <motion.span
+                    animate={
+                      isMobile
+                        ? {}
+                        : {
+                            rotate: [0, 180, 360],
+                            scale: [1, 1.2, 1],
+                          }
+                    }
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                    }}
+                    className="text-cyan-300"
+                  >
+                    <FaSparkles />
+                  </motion.span>
+                </div>
+
+                <motion.p
+                  initial={{
+                    opacity: 0,
+                    y: 8,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    delay: 0.95,
+                  }}
+                  className="text-slate-200 text-sm md:text-base mt-1"
+                >
+                  Uma Balaji and Devi
+                </motion.p>
+              </motion.div>
+            </motion.div>
+
+            <p className="text-slate-400 mt-4 text-sm">
               Loading your AI tutor...
             </p>
 
@@ -729,7 +827,7 @@ export default function App() {
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
                 transition={{
-                  duration: isMobile ? 1 : 2.2,
+                  duration: isMobile ? 1.3 : 2.7,
                 }}
                 className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 via-purple-500 to-pink-500 rounded-full"
               />
