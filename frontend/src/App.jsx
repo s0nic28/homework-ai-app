@@ -205,7 +205,7 @@ export default function App() {
       const masterGain = audioCtx.createGain();
       masterGain.connect(audioCtx.destination);
       masterGain.gain.setValueAtTime(0.0001, now);
-      masterGain.gain.exponentialRampToValueAtTime(0.22, now + 0.04);
+      masterGain.gain.exponentialRampToValueAtTime(0.45, now + 0.04);
       masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
 
       const notes = [261.63, 329.63, 392.0, 523.25, 659.25];
@@ -219,7 +219,7 @@ export default function App() {
         osc.frequency.exponentialRampToValueAtTime(freq * 1.18, now + i * 0.12 + 0.18);
 
         gain.gain.setValueAtTime(0.0001, now + i * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.12 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.32, now + i * 0.12 + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.32);
 
         osc.connect(gain);
@@ -237,7 +237,7 @@ export default function App() {
       bass.frequency.exponentialRampToValueAtTime(196, now + 0.9);
 
       bassGain.gain.setValueAtTime(0.0001, now);
-      bassGain.gain.exponentialRampToValueAtTime(0.12, now + 0.05);
+      bassGain.gain.exponentialRampToValueAtTime(0.22, now + 0.05);
       bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
 
       bass.connect(bassGain);
