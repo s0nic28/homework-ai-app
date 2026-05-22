@@ -54,6 +54,7 @@ export default function App() {
   );
 
   const messagesEndRef = useRef(null);
+  const audioStartedRef = useRef(false);
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -186,6 +187,79 @@ export default function App() {
       console.log("Supabase save failed:", err);
     }
   };
+
+  const playStartupSfx = async () => {
+    if (audioStartedRef.current) return;
+
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioContext();
+
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+
+      audioStartedRef.current = true;
+
+      const now = audioCtx.currentTime;
+      const masterGain = audioCtx.createGain();
+      masterGain.connect(audioCtx.destination);
+      masterGain.gain.setValueAtTime(0.0001, now);
+      masterGain.gain.exponentialRampToValueAtTime(0.22, now + 0.04);
+      masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
+
+      const notes = [261.63, 329.63, 392.0, 523.25, 659.25];
+
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = i % 2 === 0 ? "sine" : "triangle";
+        osc.frequency.setValueAtTime(freq, now + i * 0.12);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.18, now + i * 0.12 + 0.18);
+
+        gain.gain.setValueAtTime(0.0001, now + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.12 + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.32);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start(now + i * 0.12);
+        osc.stop(now + i * 0.12 + 0.36);
+      });
+
+      const bass = audioCtx.createOscillator();
+      const bassGain = audioCtx.createGain();
+
+      bass.type = "sine";
+      bass.frequency.setValueAtTime(98, now);
+      bass.frequency.exponentialRampToValueAtTime(196, now + 0.9);
+
+      bassGain.gain.setValueAtTime(0.0001, now);
+      bassGain.gain.exponentialRampToValueAtTime(0.12, now + 0.05);
+      bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+      bass.connect(bassGain);
+      bassGain.connect(masterGain);
+      bass.start(now);
+      bass.stop(now + 1.25);
+    } catch (err) {
+      console.log("Startup SFX blocked until user taps:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!showSplash) return;
+
+    const trySound = setTimeout(() => {
+      if (!isMobile) {
+        playStartupSfx();
+      }
+    }, 250);
+
+    return () => clearTimeout(trySound);
+  }, [showSplash, isMobile]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -762,6 +836,34 @@ export default function App() {
             <p className="text-slate-400 mt-4 text-sm">
               Loading your AI tutor...
             </p>
+
+            <motion.button
+              onClick={playStartupSfx}
+              whileTap={{ scale: 0.94 }}
+              whileHover={
+                isMobile
+                  ? {}
+                  : {
+                      scale: 1.05,
+                      y: -2,
+                    }
+              }
+              animate={
+                isMobile
+                  ? {}
+                  : {
+                      boxShadow: [
+                        "0 0 10px rgba(103,232,249,0.25)",
+                        "0 0 25px rgba(236,72,153,0.35)",
+                        "0 0 10px rgba(103,232,249,0.25)",
+                      ],
+                    }
+              }
+              transition={{ duration: 1.8, repeat: Infinity }}
+              className="mt-4 px-4 py-2 rounded-xl bg-white/10 border border-white/10 text-xs md:text-sm text-cyan-200"
+            >
+              🔊 Tap for startup SFX
+            </motion.button>
 
             <div className="flex justify-center gap-3 mt-7">
               <div className="w-3 h-3 bg-cyan-300 rounded-full animate-bounce" />
