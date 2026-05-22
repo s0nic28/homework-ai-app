@@ -21,7 +21,6 @@ import {
   FaBookOpen,
   FaMagic,
   FaHeart,
-  FaSparkles,
 } from "react-icons/fa";
 
 import Login from "./Login";
@@ -412,6 +411,12 @@ export default function App() {
               0 0 60px rgba(236,72,153,0.35);
           }
 
+          .glass-card {
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(16px);
+          }
+
           @media (max-width: 768px) {
             .custom-cursor {
               display: none;
@@ -522,9 +527,7 @@ export default function App() {
       {!isMobile && (
         <>
           <motion.div
-            animate={{
-              rotate: 360,
-            }}
+            animate={{ rotate: 360 }}
             transition={{
               duration: 25,
               repeat: Infinity,
@@ -534,9 +537,7 @@ export default function App() {
           />
 
           <motion.div
-            animate={{
-              rotate: -360,
-            }}
+            animate={{ rotate: -360 }}
             transition={{
               duration: 34,
               repeat: Infinity,
@@ -570,6 +571,78 @@ export default function App() {
     </>
   );
 
+  const SpecialThanks = () => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, y: 18 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay: 0.65, duration: 0.7, type: "spring" }}
+      className="mt-4 relative"
+    >
+      <motion.div
+        animate={
+          isMobile
+            ? {}
+            : {
+                scale: [1, 1.04, 1],
+                boxShadow: [
+                  "0 0 15px rgba(236,72,153,0.25)",
+                  "0 0 35px rgba(103,232,249,0.35)",
+                  "0 0 15px rgba(236,72,153,0.25)",
+                ],
+              }
+        }
+        transition={{
+          duration: 2.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="mx-auto w-fit px-4 py-3 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-xl"
+      >
+        <div className="flex items-center justify-center gap-2 text-pink-300 text-sm md:text-base font-semibold">
+          <motion.span
+            animate={
+              isMobile
+                ? {}
+                : {
+                    rotate: [0, 12, -12, 0],
+                    scale: [1, 1.25, 1],
+                  }
+            }
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <FaHeart />
+          </motion.span>
+
+          <span>Special thanks to</span>
+
+          <motion.span
+            animate={
+              isMobile
+                ? {}
+                : {
+                    rotate: [0, 180, 360],
+                    scale: [1, 1.2, 1],
+                  }
+            }
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-cyan-300"
+          >
+            <FaMagic />
+          </motion.span>
+        </div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.95 }}
+          className="text-slate-200 text-sm md:text-base mt-1"
+        >
+          Uma Balaji and Devi
+        </motion.p>
+      </motion.div>
+    </motion.div>
+  );
+
   if (showSplash) {
     return (
       <>
@@ -579,27 +652,17 @@ export default function App() {
           <AnimatedBackground />
 
           <motion.div
-            initial={{
-              opacity: 0,
-              scale: 0.75,
-              y: 60,
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: 0,
-            }}
+            initial={{ opacity: 0, scale: 0.75, y: 60 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{
               duration: isMobile ? 0.45 : 0.9,
               ease: "easeOut",
             }}
-            className="relative z-10 text-center bg-white/10 border border-white/10 backdrop-blur-xl rounded-[2rem] px-6 md:px-12 py-8 md:py-10 shadow-[0_0_90px_rgba(147,51,234,0.32)] w-full max-w-lg overflow-hidden"
+            className="relative z-10 text-center glass-card rounded-[2rem] px-6 md:px-12 py-8 md:py-10 shadow-[0_0_90px_rgba(147,51,234,0.32)] w-full max-w-lg overflow-hidden"
           >
             {!isMobile && (
               <motion.div
-                animate={{
-                  x: ["-120%", "120%"],
-                }}
+                animate={{ x: ["-120%", "120%"] }}
                 transition={{
                   duration: 2.4,
                   repeat: Infinity,
@@ -635,10 +698,7 @@ export default function App() {
                       scale: [1, 1.55, 1],
                       opacity: [0.7, 0, 0.7],
                     }}
-                    transition={{
-                      duration: 1.9,
-                      repeat: Infinity,
-                    }}
+                    transition={{ duration: 1.9, repeat: Infinity }}
                     className="absolute inset-0 rounded-[2rem] border-4 border-cyan-300"
                   />
 
@@ -647,10 +707,7 @@ export default function App() {
                       scale: [1, 2.1, 1],
                       opacity: [0.35, 0, 0.35],
                     }}
-                    transition={{
-                      duration: 2.6,
-                      repeat: Infinity,
-                    }}
+                    transition={{ duration: 2.6, repeat: Infinity }}
                     className="absolute inset-0 rounded-[2rem] border-2 border-pink-300"
                   />
                 </>
@@ -683,134 +740,24 @@ export default function App() {
             </div>
 
             <motion.h1
-              initial={{
-                opacity: 0,
-                y: 20,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: 0.2,
-              }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
               className="text-5xl md:text-7xl font-black bg-gradient-to-r from-cyan-300 via-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent text-glow"
             >
               Homework AI
             </motion.h1>
 
             <motion.p
-              initial={{
-                opacity: 0,
-                y: 12,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: 0.4,
-              }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
               className="text-slate-200 mt-4 text-lg"
             >
               Made by Mithun
             </motion.p>
 
-            <motion.div
-              initial={{
-                opacity: 0,
-                scale: 0.8,
-                y: 18,
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: 0.65,
-                duration: 0.7,
-                type: "spring",
-              }}
-              className="mt-4 relative"
-            >
-              <motion.div
-                animate={
-                  isMobile
-                    ? {}
-                    : {
-                        scale: [1, 1.04, 1],
-                        boxShadow: [
-                          "0 0 15px rgba(236,72,153,0.25)",
-                          "0 0 35px rgba(103,232,249,0.35)",
-                          "0 0 15px rgba(236,72,153,0.25)",
-                        ],
-                      }
-                }
-                transition={{
-                  duration: 2.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="mx-auto w-fit px-4 py-3 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-xl"
-              >
-                <div className="flex items-center justify-center gap-2 text-pink-300 text-sm md:text-base font-semibold">
-                  <motion.span
-                    animate={
-                      isMobile
-                        ? {}
-                        : {
-                            rotate: [0, 12, -12, 0],
-                            scale: [1, 1.25, 1],
-                          }
-                    }
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                    }}
-                  >
-                    <FaHeart />
-                  </motion.span>
-
-                  <span>Special thanks to</span>
-
-                  <motion.span
-                    animate={
-                      isMobile
-                        ? {}
-                        : {
-                            rotate: [0, 180, 360],
-                            scale: [1, 1.2, 1],
-                          }
-                    }
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                    }}
-                    className="text-cyan-300"
-                  >
-                    <FaSparkles />
-                  </motion.span>
-                </div>
-
-                <motion.p
-                  initial={{
-                    opacity: 0,
-                    y: 8,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  transition={{
-                    delay: 0.95,
-                  }}
-                  className="text-slate-200 text-sm md:text-base mt-1"
-                >
-                  Uma Balaji and Devi
-                </motion.p>
-              </motion.div>
-            </motion.div>
+            <SpecialThanks />
 
             <p className="text-slate-400 mt-4 text-sm">
               Loading your AI tutor...
@@ -826,9 +773,7 @@ export default function App() {
               <motion.div
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
-                transition={{
-                  duration: isMobile ? 1.3 : 2.7,
-                }}
+                transition={{ duration: isMobile ? 1.3 : 2.7 }}
                 className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 via-purple-500 to-pink-500 rounded-full"
               />
             </div>
@@ -871,24 +816,14 @@ export default function App() {
 
         <div className="relative z-10 flex flex-col app-height">
           <motion.div
-            initial={{
-              opacity: 0,
-              y: -25,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: isMobile ? 0.25 : 0.6,
-            }}
+            initial={{ opacity: 0, y: -25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: isMobile ? 0.25 : 0.6 }}
             className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 md:p-5 border-b border-white/10 bg-black/30 backdrop-blur-lg"
           >
             <div className="flex items-center gap-3">
               <motion.div
-                whileTap={{
-                  scale: 0.92,
-                }}
+                whileTap={{ scale: 0.92 }}
                 whileHover={
                   isMobile
                     ? {}
@@ -918,9 +853,7 @@ export default function App() {
               </div>
 
               <motion.button
-                whileTap={{
-                  scale: 0.92,
-                }}
+                whileTap={{ scale: 0.92 }}
                 whileHover={
                   isMobile
                     ? {}
@@ -936,9 +869,7 @@ export default function App() {
               </motion.button>
 
               <motion.button
-                whileTap={{
-                  scale: 0.95,
-                }}
+                whileTap={{ scale: 0.95 }}
                 whileHover={
                   isMobile
                     ? {}
@@ -968,11 +899,7 @@ export default function App() {
                 return (
                   <motion.button
                     key={mode.id}
-                    initial={{
-                      opacity: 0,
-                      y: 20,
-                      scale: 0.9,
-                    }}
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
                     animate={
                       selected && !isMobile
                         ? {
@@ -992,9 +919,7 @@ export default function App() {
                       delay: isMobile ? 0 : index * 0.08,
                     }}
                     onClick={() => setTutorStyle(mode.id)}
-                    whileTap={{
-                      scale: 0.94,
-                    }}
+                    whileTap={{ scale: 0.94 }}
                     whileHover={
                       isMobile
                         ? {}
@@ -1043,17 +968,9 @@ export default function App() {
             {achievements.map((a, i) => (
               <motion.div
                 key={i}
-                initial={{
-                  opacity: 0,
-                  scale: 0.9,
-                }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                }}
-                transition={{
-                  delay: isMobile ? 0 : i * 0.08,
-                }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: isMobile ? 0 : i * 0.08 }}
                 className={`px-3 md:px-4 py-2 rounded-xl whitespace-nowrap text-xs md:text-base ${
                   a.unlocked
                     ? "bg-green-500 shadow-[0_0_14px_rgba(34,197,94,0.4)]"
@@ -1068,14 +985,8 @@ export default function App() {
           <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-5">
             {messages.length === 0 && (
               <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 25,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
+                initial={{ opacity: 0, y: 25 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="text-center text-slate-400 mt-12 md:mt-20"
               >
                 <motion.h2
@@ -1086,10 +997,7 @@ export default function App() {
                           scale: [1, 1.025, 1],
                         }
                   }
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
                   className="text-2xl md:text-3xl font-bold mb-3 text-white"
                 >
                   Ask your first homework question
@@ -1112,12 +1020,7 @@ export default function App() {
                   scale: 0.96,
                   rotateX: isMobile ? 0 : 8,
                 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                  rotateX: 0,
-                }}
+                animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
                 transition={{
                   duration: isMobile ? 0.18 : 0.45,
                   type: "spring",
@@ -1136,9 +1039,7 @@ export default function App() {
                 >
                   {!isMobile && msg.type === "ai" && (
                     <motion.div
-                      animate={{
-                        x: ["-130%", "130%"],
-                      }}
+                      animate={{ x: ["-130%", "130%"] }}
                       transition={{
                         duration: 3.5,
                         repeat: Infinity,
@@ -1181,9 +1082,7 @@ export default function App() {
                     {msg.type === "ai" && (
                       <div className="flex gap-3 mt-4 flex-wrap">
                         <motion.button
-                          whileTap={{
-                            scale: 0.94,
-                          }}
+                          whileTap={{ scale: 0.94 }}
                           whileHover={
                             isMobile
                               ? {}
@@ -1200,9 +1099,7 @@ export default function App() {
                         </motion.button>
 
                         <motion.button
-                          whileTap={{
-                            scale: 0.94,
-                          }}
+                          whileTap={{ scale: 0.94 }}
                           whileHover={
                             isMobile
                               ? {}
@@ -1226,16 +1123,8 @@ export default function App() {
 
             {loading && (
               <motion.div
-                initial={{
-                  opacity: 0,
-                  scale: 0.9,
-                  y: 10,
-                }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: 0,
-                }}
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="flex items-center gap-3 bg-white/10 border border-white/10 rounded-2xl w-fit px-5 py-4"
               >
                 <motion.div
@@ -1247,10 +1136,7 @@ export default function App() {
                           scale: [1, 1.15, 1],
                         }
                   }
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                  }}
+                  transition={{ duration: 1.2, repeat: Infinity }}
                 >
                   <FaBrain />
                 </motion.div>
@@ -1269,31 +1155,15 @@ export default function App() {
           </div>
 
           <motion.div
-            initial={{
-              opacity: 0,
-              y: 25,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              delay: isMobile ? 0 : 0.2,
-            }}
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: isMobile ? 0 : 0.2 }}
             className="p-3 md:p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg"
           >
             <motion.div
               {...getRootProps()}
-              whileTap={{
-                scale: 0.98,
-              }}
-              animate={
-                isDragActive
-                  ? {
-                      scale: 1.02,
-                    }
-                  : {}
-              }
+              whileTap={{ scale: 0.98 }}
+              animate={isDragActive ? { scale: 1.02 } : {}}
               className={`border-2 border-dashed rounded-2xl p-3 md:p-4 mb-3 cursor-pointer text-center text-xs md:text-base ${
                 isDragActive
                   ? "border-blue-400 bg-blue-500/20"
@@ -1307,16 +1177,8 @@ export default function App() {
 
             {image && (
               <motion.div
-                initial={{
-                  opacity: 0,
-                  scale: 0.95,
-                  y: 10,
-                }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: 0,
-                }}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
                 className="mb-3 bg-white/10 rounded-2xl p-3 flex items-center gap-3"
               >
                 {image.type.startsWith("image/") && (
@@ -1352,9 +1214,7 @@ export default function App() {
               />
 
               <motion.button
-                whileTap={{
-                  scale: 0.9,
-                }}
+                whileTap={{ scale: 0.9 }}
                 animate={
                   listening && !isMobile
                     ? {
@@ -1372,9 +1232,7 @@ export default function App() {
                   repeat: listening && !isMobile ? Infinity : 0,
                 }}
                 onClick={() =>
-                  SpeechRecognition.startListening({
-                    continuous: false,
-                  })
+                  SpeechRecognition.startListening({ continuous: false })
                 }
                 className={`px-4 md:px-5 rounded-2xl ${
                   listening
@@ -1386,9 +1244,7 @@ export default function App() {
               </motion.button>
 
               <motion.button
-                whileTap={{
-                  scale: 0.9,
-                }}
+                whileTap={{ scale: 0.9 }}
                 whileHover={
                   isMobile
                     ? {}
